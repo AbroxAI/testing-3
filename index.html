@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Abrox Chat — Trading Bot Community (Demo)</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.ico">
+  <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
+  <style>
+    /* Minimal fallback styles so the shell renders safely when CSS not present */
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:var(--bg)}
+    .app-root{display:flex;height:100vh;gap:12px}
+    .sidebar{width:320px;background:#071029;padding:12px;box-sizing:border-box;overflow:auto}
+    .main{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#071124, #02101b)}
+    .chat-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.02);color:#dbeafe}
+    .chat-container{flex:1;overflow:auto;padding:16px}
+    #chat{display:flex;flex-direction:column;gap:8px;max-width:800px;margin:0 auto}
+    .composer{display:flex;align-items:center;padding:10px;border-top:1px solid rgba(255,255,255,0.02);gap:8px}
+    .composer input#messageInput{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071833;color:#e6eef6}
+    button{background:transparent;border:0;color:#cfe8ff;padding:8px;cursor:pointer}
+    .typing-row{padding:8px 16px;color:var(--muted);font-size:0.9rem}
+    .reply-preview{padding:8px 12px;background:#07192a;color:#d3e8ff;border-top:1px solid rgba(255,255,255,0.02)}
+    .members-list{margin-top:12px}
+    .logo{width:36px;height:36px}
+  </style>
+</head>
+<body>
+  <div id="app" class="app-root" role="application" aria-label="Abrox Chat Demo">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar" aria-label="Members sidebar">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <img src="/assets/logo.png" alt="logo" class="logo">
+        <div style="flex:1">
+          <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
+          <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+        <input id="memberSearch" placeholder="Search members" aria-label="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
+        <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
+      </div>
+
+      <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
+    </aside>
+
+    <!-- Main chat -->
+    <main id="main" class="main" role="main">
+      <header class="chat-header">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:1.05rem;font-weight:700">Abrox Trading Bots — Community</div>
+            <div style="font-size:12px;color:var(--muted)">Realistic simulation • Moderated Q&A • Live-like presence</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div id="memberCount" style="font-size:12px;color:var(--muted)">Members: 0</div>
+          </div>
+        </div>
+      </header>
+
+      <section id="chatContainer" class="chat-container" aria-label="Chat messages">
+        <div id="chat" class="chat" aria-live="polite" role="log" aria-relevant="additions"></div>
+      </section>
+
+      <div id="replyPreviewContainer" class="reply-preview" hidden></div>
+
+      <footer class="composer" role="region" aria-label="Message composer">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button id="emojiBtn" title="Emoji" aria-label="Insert emoji">😊</button>
+          <button id="mediaBtn" title="Attach media" aria-label="Attach media">📎</button>
+          <input id="fileInput" type="file" style="display:none" aria-hidden="true">
+          <button id="micBtn" title="Voice message" aria-label="Record voice">🎤</button>
+        </div>
+
+        <div style="flex:1;margin:0 8px;">
+          <input id="messageInput" placeholder="Message @community" aria-label="Message input" />
+        </div>
+
+        <div style="display:flex;gap:6px;align-items:center">
+          <button id="sendBtn" aria-label="Send message">Send</button>
+        </div>
+      </footer>
+
+      <div id="typingRow" class="typing-row" aria-hidden="true"></div>
+    </main>
+  </div>
+
+  <!-- Script load order (fingerprint DB first) -->
+  <script src="/js/fingerprint-db.js"></script>
+
+  <!-- Lightweight global registry + module-ready helpers (avoid race) -->
+  <script>
+  (function(){
+    window._abrox = window._abrox || {};
+    // ready registry & hooks
+    window._abrox._ready = window._abrox._ready || new Set();
+    window._abrox._onModuleReady = window._abrox._onModuleReady || [];
+    window._abrox.moduleReady = window._abrox.moduleReady || function(name){
+      try{ window._abrox._ready.add(name); }catch(e){}
+      try{ window._abrox._onModuleReady.forEach(fn=>{ try{ fn(name); } catch(e){} }); }catch(e){}
+    };
+    window._abrox.onModulesReady = window._abrox.onModulesReady || function(names, cb){
+      const pending = new Set(names);
+      for(const n of names) if(window._abrox._ready.has(n)) pending.delete(n);
+      if(pending.size===0){ setTimeout(()=>cb(),0); return; }
+      const listener = function(rn){ if(pending.has(rn)) pending.delete(rn); if(pending.size===0){ cb(); } };
+      window._abrox._onModuleReady.push(listener);
+    };
+
+    // avatar registry to avoid runtime duplicates (session)
+    window._abrox._avatarRegistry = window._abrox._avatarRegistry || new Set();
+
+    // pinned message helper
+    window._abrox.pinMessage = window._abrox.pinMessage || function(id){
+      window._abrox._pinned = id;
+      try{ localStorage.setItem('abrox_pinned', id); }catch(e){}
+    };
+
+    // typing fallback
+    window._abrox.showTyping = window._abrox.showTyping || function(names){
+      const el = document.getElementById('typingRow');
+      if(!el) return;
+      if(!names || !names.length){ el.textContent=''; el.style.display='none'; return; }
+      el.textContent = names.join(', ') + ' typing...';
+      el.style.display = 'block';
+    };
+
+    // simple presence baseline (can be overridden by presence-manager)
+    window._abrox.presenceBaseline = window._abrox.presenceBaseline || 76;
+  })();
+  </script>
+
+  <!-- App scripts (order is important) -->
+  <script src="/js/icons.js"></script>
+  <script src="/js/synthetic-people.js"></script>
+  <script src="/js/message-pool.js"></script>
+  <script src="/js/message.js"></script>
+  <script src="/js/ui-adapter.js"></script>
+  <script src="/js/presence-manager.js"></script>
+  <script src="/js/typing-engine.js"></script>
+  <script src="/js/simulation-engine.js"></script>
+  <script src="/js/moderated-qa.js"></script>
+
+  <!-- Precaching / Service worker registration (keeps offline demo comfortable) -->
+  <script src="/precache.js"></script>
+
+  <!-- Boot sequence -->
+  <script>
+  (async function boot(){
+    try{
+      if(window.FingerprintDB && typeof window.FingerprintDB.init === 'function'){
+        await FingerprintDB.init();
+        console.info('[Abrox] FingerprintDB ready');
+      }
+    }catch(e){ console.warn('[Abrox] FingerprintDB init failed', e); }
+
+    // flag index shell ready
+    window._abrox.moduleReady('IndexHTML');
+
+    // when core modules are ready, prefill the UI with last N messages
+    window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
+      try{
+        if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
+          window.uiAdapter.prefill(); // prefill from MessagePool (last N messages)
+        }
+      }catch(e){ console.warn('[Abrox] uiAdapter.prefill failed', e); }
+    });
+
+    // Expose a simple start() that the user or tests can call to begin SimulationEngine
+    window.AbroxStart = function(opts){
+      opts = opts || {};
+      try{
+        if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
+          SimulationEngine.configure(opts);
+          SimulationEngine.start();
+          console.info('[Abrox] SimulationEngine started');
+        } else {
+          console.warn('[Abrox] SimulationEngine not available yet');
+        }
+      }catch(e){ console.warn('[Abrox] AbroxStart err', e); }
+    };
+
+  })();
+  </script>
+</body>
+</html>
