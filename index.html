@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Abrox Chat — Trading Bot Community (Demo)</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.ico">
   <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
   <style>
     /* Minimal fallback styles so the shell renders safely when CSS not present */
@@ -31,7 +31,7 @@
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar" aria-label="Members sidebar">
       <div style="display:flex;align-items:center;gap:8px;">
-        <img src="assets/logo.png" alt="logo" class="logo">
+        <img src="/assets/logo.png" alt="logo" class="logo">
         <div style="flex:1">
           <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
           <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
@@ -88,15 +88,13 @@
   </div>
 
   <!-- Script load order (fingerprint DB first) -->
-  <script src="js/fingerprint-db.js"></script>
-  <!-- Run the one-time smoke-test after fingerprint-db loads -->
-  <script src="js/fingerprint-test.js"></script>
+  <script src="/js/fingerprint-db.js"></script>
+  <script src="/js/fingerprint-test.js"></script>
 
-  <!-- Lightweight global registry + module-ready helpers (avoid race) -->
+  <!-- Lightweight global registry + module-ready helpers -->
   <script>
   (function(){
     window._abrox = window._abrox || {};
-    // ready registry & hooks
     window._abrox._ready = window._abrox._ready || new Set();
     window._abrox._onModuleReady = window._abrox._onModuleReady || [];
     window._abrox.moduleReady = window._abrox.moduleReady || function(name){
@@ -110,17 +108,11 @@
       const listener = function(rn){ if(pending.has(rn)) pending.delete(rn); if(pending.size===0){ cb(); } };
       window._abrox._onModuleReady.push(listener);
     };
-
-    // avatar registry to avoid runtime duplicates (session)
     window._abrox._avatarRegistry = window._abrox._avatarRegistry || new Set();
-
-    // pinned message helper
     window._abrox.pinMessage = window._abrox.pinMessage || function(id){
       window._abrox._pinned = id;
       try{ localStorage.setItem('abrox_pinned', id); }catch(e){}
     };
-
-    // typing fallback
     window._abrox.showTyping = window._abrox.showTyping || function(names){
       const el = document.getElementById('typingRow');
       if(!el) return;
@@ -128,25 +120,23 @@
       el.textContent = names.join(', ') + ' typing...';
       el.style.display = 'block';
     };
-
-    // simple presence baseline (can be overridden by presence-manager)
     window._abrox.presenceBaseline = window._abrox.presenceBaseline || 76;
   })();
   </script>
 
-  <!-- App scripts (order is important) -->
-  <script src="js/icons.js"></script>
-  <script src="js/synthetic-people.js"></script>
-  <script src="js/message-pool.js"></script>
-  <script src="js/message.js"></script>
-  <script src="js/ui-adapter.js"></script>
-  <script src="js/presence-manager.js"></script>
-  <script src="js/typing-engine.js"></script>
-  <script src="js/simulation-engine.js"></script>
-  <script src="js/moderated-qa.js"></script>
+  <!-- App scripts -->
+  <script src="/js/icons.js"></script>
+  <script src="/js/synthetic-people.js"></script>
+  <script src="/js/message-pool.js"></script>
+  <script src="/js/message.js"></script>
+  <script src="/js/ui-adapter.js"></script>
+  <script src="/js/presence-manager.js"></script>
+  <script src="/js/typing-engine.js"></script>
+  <script src="/js/simulation-engine.js"></script>
+  <script src="/js/moderated-qa.js"></script>
 
-  <!-- Precaching / Service worker registration (keeps offline demo comfortable) -->
-  <script src="precache.js"></script>
+  <!-- Precaching / Service worker -->
+  <script src="/precache.js"></script>
 
   <!-- Boot sequence -->
   <script>
@@ -158,19 +148,16 @@
       }
     }catch(e){ console.warn('[Abrox] FingerprintDB init failed', e); }
 
-    // flag index shell ready
     window._abrox.moduleReady('IndexHTML');
 
-    // when core modules are ready, prefill the UI with last N messages
     window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
       try{
         if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
-          window.uiAdapter.prefill(); // prefill from MessagePool (last N messages)
+          window.uiAdapter.prefill();
         }
       }catch(e){ console.warn('[Abrox] uiAdapter.prefill failed', e); }
     });
 
-    // Expose a simple start() that the user or tests can call to begin SimulationEngine
     window.AbroxStart = function(opts){
       opts = opts || {};
       try{
@@ -180,10 +167,9 @@
           console.info('[Abrox] SimulationEngine started');
         } else {
           console.warn('[Abrox] SimulationEngine not available yet');
-      }
+        }
       }catch(e){ console.warn('[Abrox] AbroxStart err', e); }
     };
-
   })();
   </script>
 </body>
