@@ -1,7 +1,5 @@
-// fingerprint-test.js
-// One-time smoke test for FingerprintDB.
-// This test computes a fingerprint of a unique test string and adds it to the DB.
-// It does NOT write `nextIndex` or other meta to avoid interfering with generator state.
+`// js/fingerprint-test.js
+// One-time smoke test for FingerprintDB
 
 (async function(){
   try{
