@@ -7,7 +7,7 @@
   <style>
     body{background:#071029;color:#cfe8ff;font-family:Arial,sans-serif;padding:20px;}
     h1{font-size:1.3rem;margin-bottom:10px;}
-    pre{background:#0b1220;padding:10px;border-radius:6px;overflow:auto;}
+    pre{background:#0b1220;padding:10px;border-radius:6px;overflow:auto;height:80vh;}
   </style>
 </head>
 <body>
@@ -17,14 +17,25 @@
   <!-- FingerprintDB library -->
   <script src="js/fingerprint-db.js"></script>
 
-  <!-- FingerprintDB smoke test -->
-  <script src="js/fingerprint-test.js"></script>
-
-  <!-- Minimal logging -->
+  <!-- Redirect console to page -->
   <script>
     const logEl = document.getElementById('log');
-    const log = (...args) => { console.log(...args); logEl.textContent += args.join(' ') + '\n'; };
-    window.fpLogger = log;
+
+    function appendLog(msg){
+      logEl.textContent += msg + '\n';
+      logEl.scrollTop = logEl.scrollHeight; // auto-scroll
+    }
+
+    ['log','info','warn','error'].forEach(method => {
+      const orig = console[method];
+      console[method] = (...args)=>{
+        appendLog(args.join(' '));
+        orig.apply(console,args);
+      }
+    });
   </script>
+
+  <!-- FingerprintDB test -->
+  <script src="js/fingerprint-test.js"></script>
 </body>
 </html>
