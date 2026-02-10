@@ -1,32 +1,49 @@
 // js/message.js
-// Responsible for rendering messages into the chat container
 
 window.Message = (function(){
   const chatContainer = document.getElementById('chat');
+  const typingRow = document.getElementById('typingRow');
+  const replyPreviewContainer = document.getElementById('replyPreviewContainer');
 
-  function renderMessage(msg) {
-    // msg: {id, authorId, text, timestamp, replyToId (optional)}
+  function renderMessage(msg){
+    const div = document.createElement('div');
+    div.className = 'chat-message';
+    div.dataset.id = msg.id;
 
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-message';
-    msgDiv.dataset.id = msg.id;
-
-    let content = '';
-    if(msg.replyToId) {
-      content += `<div class="chat-reply">Replying to: <span data-reply-id="${msg.replyToId}">${msg.replyToId}</span></div>`;
+    let html = `<strong>${msg.authorId}</strong>: ${msg.text}`;
+    if(msg.replyTo){
+      html = `<div class="reply-thread">↳ Replying to #${msg.replyTo}</div>` + html;
     }
-    content += `<div class="chat-text">${msg.text}</div>`;
-    content += `<div class="chat-meta"><small>${new Date(msg.timestamp).toLocaleTimeString()}</small></div>`;
 
-    msgDiv.innerHTML = content;
-
-    chatContainer.appendChild(msgDiv);
+    div.innerHTML = html;
+    chatContainer.appendChild(div);
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
-  function renderMessages(msgArray) {
-    msgArray.forEach(renderMessage);
+  function showTyping(authorId){
+    typingRow.textContent = `${authorId} is typing...`;
+    typingRow.style.display = 'block';
   }
 
-  return { renderMessage, renderMessages };
+  function hideTyping(){
+    typingRow.style.display = 'none';
+  }
+
+  function showReplyPreview(msg){
+    replyPreviewContainer.hidden = false;
+    replyPreviewContainer.textContent = `Replying to ${msg.authorId}: ${msg.text}`;
+  }
+
+  function hideReplyPreview(){
+    replyPreviewContainer.hidden = true;
+    replyPreviewContainer.textContent = '';
+  }
+
+  return {
+    renderMessage,
+    showTyping,
+    hideTyping,
+    showReplyPreview,
+    hideReplyPreview
+  };
 })();
