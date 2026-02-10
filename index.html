@@ -2,15 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Fingerprint Test</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>FingerprintDB Test — Abrox</title>
+  <style>
+    body{background:#071029;color:#cfe8ff;font-family:Arial,sans-serif;padding:20px;}
+    h1{font-size:1.3rem;margin-bottom:10px;}
+    pre{background:#0b1220;padding:10px;border-radius:6px;overflow:auto;}
+  </style>
 </head>
 <body>
+  <h1>FingerprintDB Test</h1>
+  <pre id="log">Initializing...</pre>
 
-<h2>Fingerprint Test Page</h2>
+  <!-- FingerprintDB library -->
+  <script src="js/fingerprint-db.js"></script>
 
-<!-- IMPORTANT: NO leading / -->
-<script src="js/fingerprint-db.js"></script>
-<script src="js/fingerprint-test.js"></script>
+  <!-- FingerprintDB smoke test -->
+  <script src="js/fingerprint-test.js"></script>
 
+  <!-- Minimal logging -->
+  <script>
+    const logEl = document.getElementById('log');
+    const log = (...args) => { console.log(...args); logEl.textContent += args.join(' ') + '\n'; };
+    window.fpLogger = log;
+  </script>
 </body>
 </html>
