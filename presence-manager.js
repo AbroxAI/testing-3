@@ -1,66 +1,47 @@
 // js/presence-manager.js
-// Tracks online members, typing indicators, and updates UI counts
 
 window.PresenceManager = (function(){
+  const membersListEl = document.getElementById('membersList');
   const onlineCountEl = document.getElementById('onlineCount');
   const memberCountEl = document.getElementById('memberCount');
-  const typingRow = document.getElementById('typingRow');
 
-  let onlineMembers = [];
-  let typingMembers = [];
-
-  function updateCounts() {
-    onlineCountEl.textContent = onlineMembers.length;
-    memberCountEl.textContent = `Members: ${onlineMembers.length}`;
+  function renderMember(member){
+    let el = document.getElementById('member-'+member.id);
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'member-'+member.id;
+      el.className = 'member';
+      membersListEl.appendChild(el);
+    }
+    el.innerHTML = `<img src="${member.avatar}" width="24" height="24" style="border-radius:50%;margin-right:6px;"> 
+                    <span>${member.name}</span> ${member.online ? '🟢' : '⚪'}`;
   }
 
-  function showTyping() {
-    if(typingMembers.length === 0){
-      typingRow.hidden = true;
-    } else if(typingMembers.length === 1){
-      typingRow.hidden = false;
-      typingRow.textContent = `${typingMembers[0]} is typing...`;
-    } else {
-      typingRow.hidden = false;
-      typingRow.textContent = `${typingMembers.join(', ')} are typing...`;
+  function updateAll(){
+    const members = window.SyntheticPeople.getAllMembers();
+    members.forEach(renderMember);
+    const onlineCount = window.SyntheticPeople.getOnlineMembers().length;
+    onlineCountEl.textContent = onlineCount;
+    memberCountEl.textContent = members.length;
+  }
+
+  function setOnline(memberId, state){
+    const member = window.SyntheticPeople.getAllMembers().find(m => m.id === memberId);
+    if(member){
+      member.online = state;
+      renderMember(member);
+      updateAll();
     }
   }
 
-  function memberOnline(member) {
-    if(!onlineMembers.includes(member)){
-      onlineMembers.push(member);
-      updateCounts();
-    }
-  }
-
-  function memberOffline(member) {
-    onlineMembers = onlineMembers.filter(m => m !== member);
-    typingMembers = typingMembers.filter(m => m !== member);
-    updateCounts();
-    showTyping();
-  }
-
-  function memberTyping(member) {
-    if(!typingMembers.includes(member)) typingMembers.push(member);
-    showTyping();
-  }
-
-  function memberStopTyping(member) {
-    typingMembers = typingMembers.filter(m => m !== member);
-    showTyping();
-  }
-
-  // For simulation: random typing events
-  function simulateTyping(member) {
-    memberTyping(member);
-    setTimeout(()=>memberStopTyping(member), 2000 + Math.random()*3000);
+  function init(){
+    updateAll();
   }
 
   return {
-    memberOnline,
-    memberOffline,
-    memberTyping,
-    memberStopTyping,
-    simulateTyping
+    renderMember,
+    updateAll,
+    setOnline,
+    init
   };
 })();
