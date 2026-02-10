@@ -1,51 +1,46 @@
 // js/synthetic-people.js
+// Simulates members in the chat for a realistic environment
 
 window.SyntheticPeople = (function(){
-  const people = [];
-
-  // Example avatars — use your /assets/avatars/ folder
-  const avatars = [
-    '/assets/avatars/admin1.png',
-    '/assets/avatars/admin2.png',
-    '/assets/avatars/admin3.png',
-    '/assets/avatars/user1.png',
-    '/assets/avatars/user2.png'
-  ];
-
-  // Example names
+  const members = [];
   const names = [
-    'BotAlpha','BotBeta','BotGamma','TraderJoe','TraderAmy'
+    "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Heidi",
+    "Ivan", "Judy", "Karl", "Leo", "Mallory", "Niaj", "Olivia", "Peggy"
   ];
 
-  // Create a person object
-  function createPerson(id){
-    const name = names[Math.floor(Math.random()*names.length)];
-    const avatar = avatars[Math.floor(Math.random()*avatars.length)];
-    const online = Math.random() > 0.2; // 80% chance online
-    const person = { id, name, avatar, online };
-    people.push(person);
-    return person;
+  function randomName() {
+    return names[Math.floor(Math.random() * names.length)];
   }
 
-  // Get all people
-  function getAll(){ return people; }
+  function randomId() {
+    return 'user-' + Math.random().toString(36).slice(2,8);
+  }
 
-  // Get by ID
-  function getById(id){ return people.find(p=>p.id===id); }
+  function createMember() {
+    const member = {
+      id: randomId(),
+      name: randomName(),
+      online: Math.random() < 0.7, // 70% chance to be online
+      avatar: `/assets/avatars/${Math.floor(Math.random()*3)+1}.png`
+    };
+    members.push(member);
+    return member;
+  }
 
-  // Prefill N people
-  function prefill(count=5){
+  function getMembers() {
+    return members;
+  }
+
+  function populate(count = 10) {
     for(let i=0;i<count;i++){
-      createPerson('p'+i);
+      createMember();
     }
-    console.info('[SyntheticPeople] Prefilled', count, 'people');
-    return people;
+    return members;
   }
 
-  return {
-    createPerson,
-    getAll,
-    getById,
-    prefill
-  };
+  function getOnlineCount() {
+    return members.filter(m => m.online).length;
+  }
+
+  return { createMember, getMembers, populate, getOnlineCount };
 })();
