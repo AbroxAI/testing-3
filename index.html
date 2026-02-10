@@ -95,8 +95,47 @@
     </main>
   </div>
 
-  <!-- Scripts -->
-  <script src="/js/fingerprint-db.js"></script>
+  <!-- Inline minimal FingerprintDB -->
+  <script>
+    // Minimal FingerprintDB for testing
+    window.FingerprintDB = {
+      _fps: [],
+      init: async ()=>{},
+      fingerprintText: async (txt)=>'fp-'+Math.random().toString(36).slice(2,8),
+      has: async (fp)=>window.FingerprintDB._fps.includes(fp),
+      add: async (fp)=>window.FingerprintDB._fps.push(fp),
+      count: async ()=>window.FingerprintDB._fps.length
+    };
+
+    const logContainer = document.getElementById('fpLogs');
+    function logToPage(msg){ logContainer.textContent += msg + '\n'; }
+    const origLog = console.log, origErr = console.error;
+    console.log = (...args)=>{ logToPage(args.join(' ')); origLog.apply(console,args); };
+    console.error = (...args)=>{ logToPage('❌ '+args.join(' ')); origErr.apply(console,args); };
+
+    (async function(){
+      try{
+        console.log('🔎 Initializing FingerprintDB...');
+        await FingerprintDB.init();
+        console.log('✅ FingerprintDB ready');
+
+        const uniqueTestString = 'abrox-smoke-test-' + new Date().toISOString() + '-' + Math.random().toString(36).slice(2,8);
+        const fp = await FingerprintDB.fingerprintText(uniqueTestString);
+        console.log('🆔 Fingerprint:', fp);
+
+        console.log('❓ Has before add?', await FingerprintDB.has(fp));
+        await FingerprintDB.add(fp);
+        console.log('✅ Has after add?', await FingerprintDB.has(fp));
+
+        const count = await FingerprintDB.count();
+        console.log('📦 Total fingerprints now:', count);
+
+        console.log('🎉 Fingerprint test complete.');
+      }catch(e){ console.error(e); }
+    })();
+  </script>
+
+  <!-- Scripts for chat (unchanged) -->
   <script src="/js/icons.js"></script>
   <script src="/js/synthetic-people.js"></script>
   <script src="/js/message-pool.js"></script>
@@ -108,26 +147,12 @@
   <script src="/js/moderated-qa.js"></script>
   <script src="/precache.js"></script>
 
-  <!-- Lucide icons init -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       if(window.lucide) lucide.createIcons();
     });
-  </script>
 
-  <!-- Minimal Fingerprint test -->
-  <script src="/js/fingerprint-test.js"></script>
-
-  <!-- App boot -->
-  <script>
     (async function boot(){
-      try{
-        if(window.FingerprintDB && typeof window.FingerprintDB.init === 'function'){
-          await FingerprintDB.init();
-          console.info('[Abrox] FingerprintDB ready');
-        }
-      }catch(e){ console.warn('[Abrox] FingerprintDB init failed', e); }
-
       window._abrox.moduleReady('IndexHTML');
 
       window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
