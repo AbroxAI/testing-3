@@ -14,7 +14,7 @@ window.FingerprintDB = (function(){
   }
 
   async function fingerprintText(txt) {
-    // Simple hash-like string for demo; in prod, use real hash/fingerprint
+    // Simple hash-like string for demo; in production, replace with real hash/fingerprint logic
     return 'fp-' + Math.random().toString(36).slice(2,8);
   }
 
