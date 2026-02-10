@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Abrox Chat — Trading Bot Community (Demo)</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="icon" href="/favicon.ico">
   <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
 
   <!-- Minimal fallback styles -->
@@ -39,7 +39,7 @@
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar" aria-label="Members sidebar">
       <div style="display:flex;align-items:center;gap:8px;">
-        <img src="assets/logo.png" alt="logo" class="logo">
+        <img src="/assets/logo.png" alt="logo" class="logo">
         <div style="flex:1">
           <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
           <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
@@ -96,18 +96,17 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/fingerprint-db.js"></script>
-
-  <script src="js/icons.js"></script>
-  <script src="js/synthetic-people.js"></script>
-  <script src="js/message-pool.js"></script>
-  <script src="js/message.js"></script>
-  <script src="js/ui-adapter.js"></script>
-  <script src="js/presence-manager.js"></script>
-  <script src="js/typing-engine.js"></script>
-  <script src="js/simulation-engine.js"></script>
-  <script src="js/moderated-qa.js"></script>
-  <script src="precache.js"></script>
+  <script src="/js/fingerprint-db.js"></script>
+  <script src="/js/icons.js"></script>
+  <script src="/js/synthetic-people.js"></script>
+  <script src="/js/message-pool.js"></script>
+  <script src="/js/message.js"></script>
+  <script src="/js/ui-adapter.js"></script>
+  <script src="/js/presence-manager.js"></script>
+  <script src="/js/typing-engine.js"></script>
+  <script src="/js/simulation-engine.js"></script>
+  <script src="/js/moderated-qa.js"></script>
+  <script src="/precache.js"></script>
 
   <!-- Lucide icons init -->
   <script>
@@ -116,36 +115,8 @@
     });
   </script>
 
-  <!-- Inline Fingerprint Test -->
-  <script>
-    const logContainer = document.getElementById('fpLogs');
-    function logToPage(msg){ logContainer.textContent += msg + '\n'; }
-    const origLog = console.log, origErr = console.error;
-    console.log = (...args)=>{ logToPage(args.join(' ')); origLog.apply(console,args); };
-    console.error = (...args)=>{ logToPage('❌ '+args.join(' ')); origErr.apply(console,args); };
-
-    (async function(){
-      try{
-        console.log('🔎 Initializing FingerprintDB...');
-        if(!window.FingerprintDB){ console.error('FingerprintDB not found'); return; }
-        await FingerprintDB.init();
-        console.log('✅ FingerprintDB ready');
-
-        const uniqueTestString = 'abrox-smoke-test-' + new Date().toISOString() + '-' + Math.random().toString(36).slice(2,8);
-        const fp = await FingerprintDB.fingerprintText(uniqueTestString);
-        console.log('🆔 Fingerprint:', fp);
-
-        console.log('❓ Has before add?', await FingerprintDB.has(fp));
-        await FingerprintDB.add(fp);
-        console.log('✅ Has after add?', await FingerprintDB.has(fp));
-
-        const count = await FingerprintDB.count();
-        console.log('📦 Total fingerprints now:', count);
-
-        console.log('🎉 Fingerprint test complete.');
-      }catch(e){ console.error(e); }
-    })();
-  </script>
+  <!-- Minimal Fingerprint test -->
+  <script src="/js/fingerprint-test.js"></script>
 
   <!-- App boot -->
   <script>
