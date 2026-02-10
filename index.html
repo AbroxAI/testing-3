@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Abrox Chat — Trading Bot Community (Demo)</title>
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.ico">
   <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
 
   <!-- Minimal fallback styles -->
@@ -25,17 +25,21 @@
     .reply-preview{padding:8px 12px;background:#07192a;color:#d3e8ff;border-top:1px solid rgba(255,255,255,0.02)}
     .members-list{margin-top:12px}
     .logo{width:36px;height:36px}
+    #fpLogs{background:#071124;color:#cfe8ff;padding:10px;font-size:12px;height:300px;overflow:auto;border:1px solid #0b1220;margin:10px;}
   </style>
 
   <!-- Lucide icons -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
 </head>
 <body>
+  <!-- Fingerprint logs container -->
+  <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
+
   <div id="app" class="app-root" role="application" aria-label="Abrox Chat Demo">
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar" aria-label="Members sidebar">
       <div style="display:flex;align-items:center;gap:8px;">
-        <img src="/assets/logo.png" alt="logo" class="logo">
+        <img src="assets/logo.png" alt="logo" class="logo">
         <div style="flex:1">
           <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
           <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
@@ -91,12 +95,51 @@
     </main>
   </div>
 
-  <!-- Initialize Lucide icons -->
+  <!-- Scripts -->
+  <script src="js/fingerprint-db.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/synthetic-people.js"></script>
+  <script src="js/message-pool.js"></script>
+  <script src="js/message.js"></script>
+  <script src="js/ui-adapter.js"></script>
+  <script src="js/presence-manager.js"></script>
+  <script src="js/typing-engine.js"></script>
+  <script src="js/simulation-engine.js"></script>
+  <script src="js/moderated-qa.js"></script>
+  <script src="precache.js"></script>
+
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       if(window.lucide) lucide.createIcons();
     });
-  </script>
 
+    (async function boot(){
+      try{
+        if(window.FingerprintDB && typeof window.FingerprintDB.init === 'function'){
+          await FingerprintDB.init();
+          console.info('[Abrox] FingerprintDB ready');
+        }
+      }catch(e){ console.warn('[Abrox] FingerprintDB init failed', e); }
+
+      window._abrox.moduleReady('IndexHTML');
+
+      window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
+        if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
+          uiAdapter.prefill();
+        }
+      });
+
+      window.AbroxStart = function(opts){
+        opts = opts || {};
+        if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
+          SimulationEngine.configure(opts);
+          SimulationEngine.start();
+          console.info('[Abrox] SimulationEngine started');
+        } else {
+          console.warn('[Abrox] SimulationEngine not available yet');
+        }
+      };
+    })();
+  </script>
 </body>
 </html>
