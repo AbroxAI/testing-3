@@ -1,72 +1,81 @@
 // js/ui-adapter.js
-// Connects UI inputs with MessagePool & Message rendering
 
 window.uiAdapter = (function(){
-  const messageInput = document.getElementById('messageInput');
+  const input = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
   const emojiBtn = document.getElementById('emojiBtn');
-  const replyPreviewContainer = document.getElementById('replyPreviewContainer');
+  const mediaBtn = document.getElementById('mediaBtn');
+  const micBtn = document.getElementById('micBtn');
+  const fileInput = document.getElementById('fileInput');
 
-  let currentReplyId = null;
+  let replyToMessage = null;
+  let micActive = false;
 
-  function prefill() {
-    // Optionally prefill chat or inputs if needed
-    messageInput.value = '';
+  function prefill(){
+    input.value = '';
   }
 
-  function showReplyPreview(replyMsg) {
-    currentReplyId = replyMsg.id;
-    replyPreviewContainer.hidden = false;
-    replyPreviewContainer.textContent = `Replying to: ${replyMsg.text}`;
+  function setReply(msg){
+    replyToMessage = msg;
+    window.Message.showReplyPreview(msg);
   }
 
-  function clearReplyPreview() {
-    currentReplyId = null;
-    replyPreviewContainer.hidden = true;
-    replyPreviewContainer.textContent = '';
+  function clearReply(){
+    replyToMessage = null;
+    window.Message.hideReplyPreview();
   }
 
-  function getMessageFromInput() {
-    const text = messageInput.value.trim();
-    if(!text) return null;
+  function sendMessage(){
+    if(!input.value.trim() && !micActive) return;
+
     const msg = {
-      id: 'msg-' + Math.random().toString(36).slice(2,8),
-      authorId: 'me',
-      text,
+      text: input.value.trim() || '[Voice message]',
+      authorId: 'You',
       timestamp: Date.now(),
-      replyToId: currentReplyId
+      replyTo: replyToMessage ? replyToMessage.id : null
     };
-    return msg;
-  }
 
-  function sendMessage() {
-    const msg = getMessageFromInput();
-    if(!msg) return;
+    window.MessagePool.addMessage(msg);
     window.Message.renderMessage(msg);
-    if(window.MessagePool) window.MessagePool.add(msg);
-    messageInput.value = '';
-    clearReplyPreview();
+    input.value = '';
+    clearReply();
+
+    if(micActive){
+      micActive = false;
+      micBtn.innerHTML = '<i data-lucide="mic"></i>';
+    }
   }
 
-  // Event bindings
   sendBtn.addEventListener('click', sendMessage);
-  messageInput.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  input.addEventListener('keypress', function(e){
+    if(e.key === 'Enter') sendMessage();
+  });
+
+  micBtn.addEventListener('click', function(){
+    micActive = !micActive;
+    micBtn.innerHTML = micActive ? '<i data-lucide="send"></i>' : '<i data-lucide="mic"></i>';
+  });
+
+  emojiBtn.addEventListener('click', function(){
+    input.value += '😊';
+    input.focus();
+  });
+
+  mediaBtn.addEventListener('click', function(){
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', function(){
+    const file = fileInput.files[0];
+    if(file){
       sendMessage();
     }
   });
 
-  emojiBtn.addEventListener('click', function(){
-    // For demo, insert a smile emoji at cursor
-    const emoji = '😊';
-    const start = messageInput.selectionStart;
-    const end = messageInput.selectionEnd;
-    const val = messageInput.value;
-    messageInput.value = val.slice(0,start) + emoji + val.slice(end);
-    messageInput.focus();
-    messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
-  });
-
-  return { prefill, showReplyPreview, clearReplyPreview, sendMessage };
+  return {
+    prefill,
+    setReply,
+    clearReply,
+    sendMessage
+  };
 })();
