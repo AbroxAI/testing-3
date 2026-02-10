@@ -1,46 +1,49 @@
 // js/synthetic-people.js
-// Simulates members in the chat for a realistic environment
 
 window.SyntheticPeople = (function(){
   const members = [];
-  const names = [
-    "Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Heidi",
-    "Ivan", "Judy", "Karl", "Leo", "Mallory", "Niaj", "Olivia", "Peggy"
+  const NAMES = ['Alice','Bob','Charlie','Diana','Eve','Frank','Grace','Hector','Ivy','Jack'];
+  const AVATARS = [
+    '/assets/avatars/admin1.png',
+    '/assets/avatars/admin2.png',
+    '/assets/avatars/admin3.png',
+    '/assets/avatars/user1.png',
+    '/assets/avatars/user2.png'
   ];
 
-  function randomName() {
-    return names[Math.floor(Math.random() * names.length)];
+  function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  function randomId() {
-    return 'user-' + Math.random().toString(36).slice(2,8);
-  }
-
-  function createMember() {
+  function createMember(id) {
     const member = {
-      id: randomId(),
-      name: randomName(),
-      online: Math.random() < 0.7, // 70% chance to be online
-      avatar: `/assets/avatars/${Math.floor(Math.random()*3)+1}.png`
+      id: id,
+      name: randomChoice(NAMES) + id,
+      avatar: randomChoice(AVATARS),
+      online: Math.random() < 0.7, // 70% chance online
+      typing: false
     };
     members.push(member);
     return member;
   }
 
-  function getMembers() {
+  function getAllMembers() {
     return members;
   }
 
-  function populate(count = 10) {
-    for(let i=0;i<count;i++){
-      createMember();
-    }
-    return members;
+  function getOnlineMembers() {
+    return members.filter(m => m.online);
   }
 
-  function getOnlineCount() {
-    return members.filter(m => m.online).length;
+  function toggleTyping(memberId, state){
+    const m = members.find(x => x.id === memberId);
+    if(m) m.typing = state;
   }
 
-  return { createMember, getMembers, populate, getOnlineCount };
+  return {
+    createMember,
+    getAllMembers,
+    getOnlineMembers,
+    toggleTyping
+  };
 })();
