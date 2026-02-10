@@ -6,7 +6,7 @@
   <title>Abrox Chat — Trading Bot Community (Demo)</title>
   <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
 
-  <!-- Inline minimal fallback styles -->
+  <!-- Minimal fallback styles -->
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:var(--bg)}
@@ -30,7 +30,7 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
 </head>
 <body>
-  <!-- Fingerprint logs container -->
+  <!-- Fingerprint logs -->
   <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
 
   <div id="app" class="app-root" role="application" aria-label="Abrox Chat Demo">
@@ -40,13 +40,13 @@
         <img src="./assets/logo.png" alt="logo" class="logo">
         <div style="flex:1">
           <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
-          <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
+          <div style="font-size:12px;color:#9aa4b2">Simulated trading community</div>
         </div>
       </div>
 
       <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
         <input id="memberSearch" placeholder="Search members" aria-label="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
-        <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
+        <div style="font-size:12px;color:#9aa4b2">Online <span id="onlineCount">0</span></div>
       </div>
 
       <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
@@ -58,10 +58,10 @@
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <div style="font-size:1.05rem;font-weight:700">Abrox Trading Bots — Community</div>
-            <div style="font-size:12px;color:var(--muted)">Realistic simulation • Moderated Q&A • Live-like presence</div>
+            <div style="font-size:12px;color:#9aa4b2">Realistic simulation • Moderated Q&A • Live-like presence</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
-            <div id="memberCount" style="font-size:12px;color:var(--muted)">Members: 0</div>
+            <div id="memberCount" style="font-size:12px;color:#9aa4b2">Members: 0</div>
           </div>
         </div>
       </header>
