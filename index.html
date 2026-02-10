@@ -1,140 +1,16 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Abrox Chat — Trading Bot Community (Demo)</title>
-
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="icon" href="/favicon.ico">
-
-  <meta name="description"
-        content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
-
-  <!-- Lucide Icons -->
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
-
-  <!-- Fallback minimal styling -->
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto;color:#e6eef6;background:var(--bg)}
-    .app-root{display:flex;height:100vh}
-    .sidebar{width:320px;background:#071029;padding:12px;overflow:auto}
-    .main{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#071124,#02101b)}
-    .chat-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.02)}
-    .chat-container{flex:1;overflow:auto;padding:16px}
-    #chat{display:flex;flex-direction:column;gap:8px;max-width:800px;margin:auto}
-    .composer{display:flex;align-items:center;padding:10px;border-top:1px solid rgba(255,255,255,0.02);gap:8px}
-    .composer input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071833;color:#e6eef6}
-    button{background:transparent;border:0;color:#cfe8ff;padding:8px;cursor:pointer}
-    .typing-row{padding:8px 16px;color:var(--muted);font-size:.9rem}
-    .logo{width:36px;height:36px}
-  </style>
+  <meta charset="utf-8">
+  <title>Fingerprint Test</title>
 </head>
-
 <body>
 
-<div id="app" class="app-root">
+<h2>Fingerprint Test Page</h2>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div style="display:flex;gap:8px;align-items:center;">
-      <img src="/assets/logo.png" class="logo">
-      <div>
-        <div style="font-weight:700">Abrox Bots • Demo</div>
-        <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
-      </div>
-    </div>
-
-    <div style="margin-top:12px;display:flex;gap:8px;">
-      <input id="memberSearch" placeholder="Search members">
-      <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
-    </div>
-
-    <div id="membersList"></div>
-  </aside>
-
-  <!-- Main -->
-  <main class="main">
-    <header class="chat-header">
-      <div style="display:flex;justify-content:space-between;">
-        <div>
-          <div style="font-weight:700">Abrox Trading Bots — Community</div>
-          <div style="font-size:12px;color:var(--muted)">Realistic simulation</div>
-        </div>
-        <div id="memberCount" style="font-size:12px;color:var(--muted)">Members: 0</div>
-      </div>
-    </header>
-
-    <section class="chat-container">
-      <div id="chat"></div>
-    </section>
-
-    <div id="replyPreviewContainer" hidden></div>
-
-    <footer class="composer">
-      <button id="emojiBtn"><i data-lucide="smile"></i></button>
-      <button id="mediaBtn"><i data-lucide="paperclip"></i></button>
-      <input id="fileInput" type="file" hidden>
-      <button id="micBtn"><i data-lucide="mic"></i></button>
-      <input id="messageInput" placeholder="Message @community">
-      <button id="sendBtn">Send</button>
-    </footer>
-
-    <div id="typingRow" class="typing-row"></div>
-  </main>
-
-</div>
-
-<!-- GLOBAL REGISTRY -->
-<script>
-window._abrox = window._abrox || {};
-window._abrox._ready = new Set();
-window._abrox._onModuleReady = [];
-window._abrox.moduleReady = n => window._abrox._ready.add(n);
-window._abrox.onModulesReady = (names, cb)=>{
-  const wait=new Set(names);
-  const i=setInterval(()=>{
-    names.forEach(n=>{ if(window._abrox._ready.has(n)) wait.delete(n);});
-    if(!wait.size){ clearInterval(i); cb(); }
-  },50);
-};
-</script>
-
-<!-- LOAD ORDER -->
-<script src="/js/fingerprint-db.js"></script>
-<script src="/js/fingerprint-test.js"></script>
-
-<script src="/js/icons.js"></script>
-<script src="/js/synthetic-people.js"></script>
-<script src="/js/message-pool.js"></script>
-<script src="/js/message.js"></script>
-<script src="/js/ui-adapter.js"></script>
-<script src="/js/presence-manager.js"></script>
-<script src="/js/typing-engine.js"></script>
-<script src="/js/simulation-engine.js"></script>
-<script src="/js/moderated-qa.js"></script>
-
-<script src="/precache.js"></script>
-
-<!-- BOOT -->
-<script>
-document.addEventListener("DOMContentLoaded",()=>{
-  if(window.lucide) lucide.createIcons();
-});
-
-(async function(){
-  if(window.FingerprintDB) await FingerprintDB.init();
-  window._abrox.moduleReady('IndexHTML');
-
-  window.AbroxStart=function(opts){
-    if(window.SimulationEngine){
-      SimulationEngine.configure(opts||{});
-      SimulationEngine.start();
-    }
-  };
-})();
-</script>
+<!-- IMPORTANT: NO leading / -->
+<script src="js/fingerprint-db.js"></script>
+<script src="js/fingerprint-test.js"></script>
 
 </body>
 </html>
