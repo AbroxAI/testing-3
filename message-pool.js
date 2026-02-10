@@ -1,30 +1,41 @@
 // js/message-pool.js
-// Handles storage and retrieval of messages for the chat simulation
 
 window.MessagePool = (function(){
   const messages = [];
 
-  function addMessage(msg) {
-    // msg: {id, authorId, text, timestamp, replyToId (optional)}
-    messages.push(msg);
-    return msg;
+  function addMessage(msg){
+    const message = {
+      id: messages.length + 1,
+      text: msg.text || '',
+      authorId: msg.authorId || 'system',
+      timestamp: msg.timestamp || Date.now(),
+      replyTo: msg.replyTo || null
+    };
+    messages.push(message);
+    return message;
   }
 
-  function getMessages() {
-    return messages;
+  function getAllMessages(){
+    return [...messages];
   }
 
-  function getLastMessage() {
-    return messages[messages.length - 1] || null;
-  }
-
-  function getMessagesByAuthor(authorId) {
-    return messages.filter(m => m.authorId === authorId);
-  }
-
-  function getMessagesSince(timestamp) {
+  function getMessagesSince(timestamp){
     return messages.filter(m => m.timestamp > timestamp);
   }
 
-  return { addMessage, getMessages, getLastMessage, getMessagesByAuthor, getMessagesSince };
+  function getLastNMessages(n){
+    return messages.slice(-n);
+  }
+
+  function clearAll(){
+    messages.length = 0;
+  }
+
+  return {
+    addMessage,
+    getAllMessages,
+    getMessagesSince,
+    getLastNMessages,
+    clearAll
+  };
 })();
