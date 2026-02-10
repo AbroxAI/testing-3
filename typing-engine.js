@@ -1,54 +1,35 @@
 // js/typing-engine.js
-// Simulates typing for synthetic members
 
 window.TypingEngine = (function(){
-  const chatInput = document.getElementById('messageInput');
+  const typingRow = document.getElementById('typingRow');
 
-  let activeTypers = new Set();
+  function memberTyping(memberId, duration = 2000){
+    const member = window.SyntheticPeople.getAllMembers().find(m => m.id === memberId);
+    if(!member) return;
 
-  function typeMessage(member, message, callback){
-    if(activeTypers.has(member)) return; // already typing
-    activeTypers.add(member);
-    window.PresenceManager.memberTyping(member);
+    member.typing = true;
+    window.Message.showTyping(member.name);
 
-    let idx = 0;
-    const interval = 50 + Math.random() * 100; // variable typing speed
-
-    function typeNext(){
-      if(idx < message.length){
-        // Could show partial typing in UI if needed
-        idx++;
-        setTimeout(typeNext, interval);
-      } else {
-        activeTypers.delete(member);
-        window.PresenceManager.memberStopTyping(member);
-        if(callback) callback();
-      }
-    }
-
-    typeNext();
+    setTimeout(()=>{
+      member.typing = false;
+      window.Message.hideTyping();
+    }, duration);
   }
 
-  // Random simulated typing for synthetic people
-  function simulateRandomTyping(members, messages){
-    if(!members || members.length === 0) return;
-
-    const member = members[Math.floor(Math.random() * members.length)];
-    const message = messages[Math.floor(Math.random() * messages.length)];
-    typeMessage(member, message, ()=> {
-      // after typing finished, trigger message sending in simulation
-      if(window.SimulationEngine) SimulationEngine.sendSyntheticMessage(member, message);
-    });
+  function randomTyping(){
+    const online = window.SyntheticPeople.getOnlineMembers();
+    if(online.length === 0) return;
+    const member = online[Math.floor(Math.random()*online.length)];
+    memberTyping(member.id, 1000 + Math.random()*2000);
   }
 
-  // Start periodic simulation
-  function startSimulation(members, messages, interval=3000){
-    setInterval(()=>simulateRandomTyping(members, messages), interval);
+  function startAutoTyping(interval = 5000){
+    setInterval(randomTyping, interval);
   }
 
   return {
-    typeMessage,
-    simulateRandomTyping,
-    startSimulation
+    memberTyping,
+    randomTyping,
+    startAutoTyping
   };
 })();
