@@ -8,7 +8,6 @@
   <link rel="icon" href="/favicon.ico">
   <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
 
-  <!-- Minimal fallback styles -->
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
     html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:var(--bg)}
@@ -28,7 +27,6 @@
     #fpLogs{background:#071124;color:#cfe8ff;padding:10px;font-size:12px;height:300px;overflow:auto;border:1px solid #0b1220;margin:10px;}
   </style>
 
-  <!-- Lucide icons -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
 </head>
 <body>
@@ -45,12 +43,10 @@
           <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
         </div>
       </div>
-
       <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
         <input id="memberSearch" placeholder="Search members" aria-label="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
         <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
       </div>
-
       <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
     </aside>
 
@@ -81,11 +77,9 @@
           <input id="fileInput" type="file" style="display:none" aria-hidden="true">
           <button id="micBtn" title="Voice message" aria-label="Record voice"><i data-lucide="mic"></i></button>
         </div>
-
         <div style="flex:1;margin:0 8px;">
           <input id="messageInput" placeholder="Message @community" aria-label="Message input" />
         </div>
-
         <div style="display:flex;gap:6px;align-items:center">
           <button id="sendBtn" aria-label="Send message">Send</button>
         </div>
@@ -95,16 +89,58 @@
     </main>
   </div>
 
-  <!-- Inline minimal FingerprintDB -->
+  <!-- Persistent FingerprintDB -->
   <script>
-    // Minimal FingerprintDB for testing
     window.FingerprintDB = {
-      _fps: [],
-      init: async ()=>{},
+      _dbName: 'FingerprintDB',
+      _storeName: 'fps',
+      _db: null,
+
+      init: function(){
+        return new Promise((resolve,reject)=>{
+          const req = indexedDB.open(this._dbName,1);
+          req.onerror = ()=>reject('IndexedDB open failed');
+          req.onsuccess = ()=>{ this._db = req.result; resolve(); };
+          req.onupgradeneeded = (e)=>{
+            const db = e.target.result;
+            if(!db.objectStoreNames.contains(this._storeName)){
+              db.createObjectStore(this._storeName,{keyPath:'fp'});
+            }
+          };
+        });
+      },
+
       fingerprintText: async (txt)=>'fp-'+Math.random().toString(36).slice(2,8),
-      has: async (fp)=>window.FingerprintDB._fps.includes(fp),
-      add: async (fp)=>window.FingerprintDB._fps.push(fp),
-      count: async ()=>window.FingerprintDB._fps.length
+
+      has: async function(fp){
+        return new Promise((resolve)=>{
+          const tx = this._db.transaction(this._storeName,'readonly');
+          const store = tx.objectStore(this._storeName);
+          const req = store.get(fp);
+          req.onsuccess = ()=>resolve(!!req.result);
+          req.onerror = ()=>resolve(false);
+        });
+      },
+
+      add: async function(fp){
+        return new Promise((resolve,reject)=>{
+          const tx = this._db.transaction(this._storeName,'readwrite');
+          const store = tx.objectStore(this._storeName);
+          const req = store.add({fp});
+          req.onsuccess = ()=>resolve();
+          req.onerror = (e)=>reject(e);
+        });
+      },
+
+      count: async function(){
+        return new Promise((resolve,reject)=>{
+          const tx = this._db.transaction(this._storeName,'readonly');
+          const store = tx.objectStore(this._storeName);
+          const req = store.count();
+          req.onsuccess = ()=>resolve(req.result);
+          req.onerror = (e)=>reject(e);
+        });
+      }
     };
 
     const logContainer = document.getElementById('fpLogs');
@@ -135,7 +171,7 @@
     })();
   </script>
 
-  <!-- Scripts for chat (unchanged) -->
+  <!-- Chat scripts -->
   <script src="/js/icons.js"></script>
   <script src="/js/synthetic-people.js"></script>
   <script src="/js/message-pool.js"></script>
@@ -154,13 +190,11 @@
 
     (async function boot(){
       window._abrox.moduleReady('IndexHTML');
-
       window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
         if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
           uiAdapter.prefill();
         }
       });
-
       window.AbroxStart = function(opts){
         opts = opts || {};
         if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
