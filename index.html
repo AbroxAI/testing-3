@@ -4,15 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Abrox Chat — Trading Bot Community (Demo)</title>
-  <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
 
-  <!-- Minimal fallback styles -->
+  <!-- Inline fallback styles -->
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:var(--bg)}
+    html,body{margin:0;padding:0;width:100%;height:100%;font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif;color:#e6eef6;background:var(--bg)}
     .app-root{display:flex;height:100vh;gap:12px}
-    .sidebar{width:320px;background:#071029;padding:12px;box-sizing:border-box;overflow:auto}
-    .main{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#071124, #02101b)}
+    .sidebar{width:320px;background:#071029;padding:12px;overflow:auto;box-sizing:border-box}
+    .main{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#071124,#02101b)}
     .chat-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.02);color:#dbeafe}
     .chat-container{flex:1;overflow:auto;padding:16px}
     #chat{display:flex;flex-direction:column;gap:8px;max-width:800px;margin:0 auto}
@@ -33,9 +32,9 @@
   <!-- Fingerprint logs -->
   <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
 
-  <div id="app" class="app-root" role="application" aria-label="Abrox Chat Demo">
+  <div id="app" class="app-root">
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar" aria-label="Members sidebar">
+    <aside class="sidebar">
       <div style="display:flex;align-items:center;gap:8px;">
         <img src="./assets/logo.png" alt="logo" class="logo">
         <div style="flex:1">
@@ -43,57 +42,45 @@
           <div style="font-size:12px;color:#9aa4b2">Simulated trading community</div>
         </div>
       </div>
-
       <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-        <input id="memberSearch" placeholder="Search members" aria-label="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
+        <input id="memberSearch" placeholder="Search members">
         <div style="font-size:12px;color:#9aa4b2">Online <span id="onlineCount">0</span></div>
       </div>
-
-      <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
+      <div id="membersList" class="members-list"></div>
     </aside>
 
     <!-- Main chat -->
-    <main id="main" class="main" role="main">
+    <main class="main">
       <header class="chat-header">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
             <div style="font-size:1.05rem;font-weight:700">Abrox Trading Bots — Community</div>
             <div style="font-size:12px;color:#9aa4b2">Realistic simulation • Moderated Q&A • Live-like presence</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <div id="memberCount" style="font-size:12px;color:#9aa4b2">Members: 0</div>
-          </div>
+          <div style="font-size:12px;color:#9aa4b2">Members: <span id="memberCount">0</span></div>
         </div>
       </header>
 
-      <section id="chatContainer" class="chat-container" aria-label="Chat messages">
-        <div id="chat" class="chat" aria-live="polite" role="log" aria-relevant="additions"></div>
+      <section class="chat-container">
+        <div id="chat"></div>
       </section>
 
       <div id="replyPreviewContainer" class="reply-preview" hidden></div>
 
-      <footer class="composer" role="region" aria-label="Message composer">
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button id="emojiBtn" title="Emoji" aria-label="Insert emoji"><i data-lucide="smile"></i></button>
-          <button id="mediaBtn" title="Attach media" aria-label="Attach media"><i data-lucide="paperclip"></i></button>
-          <input id="fileInput" type="file" style="display:none" aria-hidden="true">
-          <button id="micBtn" title="Voice message" aria-label="Record voice"><i data-lucide="mic"></i></button>
-        </div>
-
-        <div style="flex:1;margin:0 8px;">
-          <input id="messageInput" placeholder="Message @community" aria-label="Message input" />
-        </div>
-
-        <div style="display:flex;gap:6px;align-items:center">
-          <button id="sendBtn" aria-label="Send message">Send</button>
-        </div>
+      <footer class="composer">
+        <button id="emojiBtn"><i data-lucide="smile"></i></button>
+        <button id="mediaBtn"><i data-lucide="paperclip"></i></button>
+        <input id="fileInput" type="file" style="display:none">
+        <button id="micBtn"><i data-lucide="mic"></i></button>
+        <input id="messageInput" placeholder="Message @community">
+        <button id="sendBtn">Send</button>
       </footer>
 
-      <div id="typingRow" class="typing-row" aria-hidden="true"></div>
+      <div id="typingRow" class="typing-row" hidden></div>
     </main>
   </div>
 
-  <!-- Scripts in root -->
+  <!-- Scripts -->
   <script src="./fingerprint-db.js"></script>
   <script src="./icons.js"></script>
   <script src="./synthetic-people.js"></script>
@@ -102,41 +89,20 @@
   <script src="./ui-adapter.js"></script>
   <script src="./presence-manager.js"></script>
   <script src="./typing-engine.js"></script>
-  <script src="./simulation-engine.js"></script>
+  <script src="./stimulation-engine.js"></script> <!-- Note the file name -->
   <script src="./moderated-qa.js"></script>
   <script src="./precache.js"></script>
 
-  <!-- Lucide icons init -->
+  <!-- Boot logic -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       if(window.lucide) lucide.createIcons();
     });
 
     (async function boot(){
-      try{
-        if(window.FingerprintDB && typeof window.FingerprintDB.init === 'function'){
-          await FingerprintDB.init();
-          console.info('[Abrox] FingerprintDB ready');
-        }
-      }catch(e){ console.warn('[Abrox] FingerprintDB init failed', e); }
-
-      window._abrox.moduleReady('IndexHTML');
-
-      window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
-        if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
-          uiAdapter.prefill();
-        }
-      });
-
+      if(window.FingerprintDB) await FingerprintDB.init();
       window.AbroxStart = function(opts){
-        opts = opts || {};
-        if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
-          SimulationEngine.configure(opts);
-          SimulationEngine.start();
-          console.info('[Abrox] SimulationEngine started');
-        } else {
-          console.warn('[Abrox] SimulationEngine not available yet');
-        }
+        if(window.SimulationEngine) SimulationEngine.start();
       };
     })();
   </script>
