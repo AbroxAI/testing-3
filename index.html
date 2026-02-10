@@ -91,55 +91,12 @@
     </main>
   </div>
 
-  <!-- Scripts -->
-  <script src="/js/fingerprint-db.js"></script>
-  <script src="/js/icons.js"></script>
-  <script src="/js/synthetic-people.js"></script>
-  <script src="/js/message-pool.js"></script>
-  <script src="/js/message.js"></script>
-  <script src="/js/ui-adapter.js"></script>
-  <script src="/js/presence-manager.js"></script>
-  <script src="/js/typing-engine.js"></script>
-  <script src="/js/simulation-engine.js"></script>
-  <script src="/js/moderated-qa.js"></script>
-  <script src="/precache.js"></script>
-
-  <!-- Lucide icons init -->
+  <!-- Initialize Lucide icons -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       if(window.lucide) lucide.createIcons();
     });
   </script>
 
-  <!-- App boot -->
-  <script>
-    (async function boot(){
-      try{
-        if(window.FingerprintDB && typeof window.FingerprintDB.init === 'function'){
-          await FingerprintDB.init();
-          console.info('[Abrox] FingerprintDB ready');
-        }
-      }catch(e){ console.warn('[Abrox] FingerprintDB init failed', e); }
-
-      window._abrox.moduleReady('IndexHTML');
-
-      window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
-        if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
-          uiAdapter.prefill();
-        }
-      });
-
-      window.AbroxStart = function(opts){
-        opts = opts || {};
-        if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
-          SimulationEngine.configure(opts);
-          SimulationEngine.start();
-          console.info('[Abrox] SimulationEngine started');
-        } else {
-          console.warn('[Abrox] SimulationEngine not available yet');
-        }
-      };
-    })();
-  </script>
 </body>
 </html>
