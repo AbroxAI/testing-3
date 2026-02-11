@@ -50,7 +50,7 @@
 
     <!-- Main chat -->
     <main class="main">
-      <!-- Header removed to avoid blocking UI -->
+      <!-- Removed blocking static header -->
 
       <section class="chat-container" aria-label="Chat messages">
         <div id="chat"></div>
@@ -59,12 +59,18 @@
       <div id="replyPreviewContainer" class="reply-preview" hidden></div>
 
       <footer class="composer">
-        <button id="emojiBtn" title="Emoji"><i data-lucide="smile"></i></button>
-        <button id="mediaBtn" title="Attach media"><i data-lucide="paperclip"></i></button>
-        <input id="fileInput" type="file" style="display:none">
-        <button id="micBtn" title="Voice message"><i data-lucide="mic"></i></button>
-        <input id="messageInput" placeholder="Message @community">
-        <button id="sendBtn">Send</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button id="emojiBtn" title="Emoji"><i data-lucide="smile"></i></button>
+          <button id="mediaBtn" title="Attach media"><i data-lucide="paperclip"></i></button>
+          <input id="fileInput" type="file" style="display:none">
+          <button id="micBtn" title="Voice message"><i data-lucide="mic"></i></button>
+        </div>
+        <div style="flex:1;margin:0 8px;">
+          <input id="messageInput" placeholder="Message @community">
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button id="sendBtn">Send</button>
+        </div>
       </footer>
 
       <div id="typingRow" class="typing-row" hidden></div>
@@ -88,7 +94,7 @@
   <script src="./precache.js"></script>
 
   <script>
-    // Lucide icons init
+    // Initialize Lucide icons
     document.addEventListener("DOMContentLoaded", function() {
       if(window.lucide) lucide.createIcons();
     });
