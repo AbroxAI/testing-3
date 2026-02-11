@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Abrox Chat — Trading Bot Community (Demo)</title>
-  <meta name="description" content="Realistic chat demo for a trading-bot community — simulated members, moderated Q&A, attachments, presence and typing." />
+  <title>Abrox Chat — Testing-3</title>
+  <meta name="description" content="Testing-3 demo — Abrox chat with simulated members, moderated Q&A, live-like presence" />
 
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
@@ -22,14 +22,14 @@
     .reply-preview{padding:8px 12px;background:#07192a;color:#d3e8ff;border-top:1px solid rgba(255,255,255,0.02)}
     .members-list{margin-top:12px}
     .logo{width:36px;height:36px}
-    #fpLogs{background:#071124;color:#cfe8ff;padding:10px;font-size:12px;height:300px;overflow:auto;border:1px solid #0b1220;margin:10px;}
+    #fpLogs{position:fixed;bottom:10px;right:10px;width:300px;height:150px;overflow:auto;background:#071124;color:#cfe8ff;padding:10px;font-size:12px;border:1px solid #0b1220;z-index:999;display:none;}
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
 </head>
 <body>
-  <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
 
+  <!-- App root -->
   <div id="app" class="app-root">
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -80,7 +80,10 @@
     </main>
   </div>
 
-  <!-- Modular Scripts -->
+  <!-- FingerprintDB logs (hidden by default) -->
+  <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
+
+  <!-- Scripts in proper order -->
   <script src="./fingerprint-db.js"></script>
   <script src="./icons.js"></script>
   <script src="./synthetic-people.js"></script>
@@ -99,7 +102,7 @@
       if(window.lucide) lucide.createIcons();
     });
 
-    // Log helper
+    // FingerprintDB log helper (hidden by default)
     const logContainer = document.getElementById('fpLogs');
     function logToPage(msg){ logContainer.textContent += msg + '\n'; }
     const origLog = console.log, origErr = console.error;
@@ -109,17 +112,23 @@
     (async function(){
       try{
         if(window.FingerprintDB){
-          console.log('🔎 Initializing FingerprintDB...');
           await FingerprintDB.init();
           console.log('✅ FingerprintDB ready');
         }
       }catch(e){ console.error(e); }
     })();
 
-    // Boot SimulationEngine once scripts ready
+    // Boot simulation once scripts ready
     (async function boot(){
+      window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
+        if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
+          uiAdapter.prefill();
+        }
+      });
+
       window.AbroxStart = function(opts){
-        if(window.SimulationEngine && typeof window.SimulationEngine.start==='function'){
+        if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
+          SimulationEngine.configure(opts);
           SimulationEngine.start();
         }
       };
