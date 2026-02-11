@@ -127,6 +127,7 @@ button {
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
 </head>
 <body>
+
 <div id="app" class="app-root">
 
   <!-- Sidebar -->
@@ -153,10 +154,8 @@ button {
     <section class="chat-container" aria-label="Chat messages">
       <div id="chat"></div>
     </section>
-
     <!-- Reply preview -->
     <div id="replyPreviewContainer" class="reply-preview" hidden></div>
-
     <!-- Composer -->
     <footer class="composer">
       <div style="display:flex;gap:6px;align-items:center;">
@@ -181,13 +180,11 @@ button {
 <!-- FingerprintDB logs -->
 <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
 
-<!-- Scripts -->
+<!-- Load all scripts sequentially -->
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  // Initialize Lucide icons
   if(window.lucide) lucide.createIcons();
 
-  // Load scripts sequentially
   const scripts = [
     './fingerprint-db.js',
     './icons.js',
@@ -233,12 +230,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// Log to page helper
+// Log helper
 const logContainer = document.getElementById('fpLogs');
 function logToPage(msg){ logContainer.textContent += msg + '\n'; }
 const origLog = console.log, origErr = console.error;
 console.log = (...args)=>{ logToPage(args.join(' ')); origLog.apply(console,args); };
 console.error = (...args)=>{ logToPage('❌ '+args.join(' ')); origErr.apply(console,args); };
 </script>
+
 </body>
 </html>
