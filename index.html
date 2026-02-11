@@ -12,7 +12,6 @@
     .app-root{display:flex;height:100vh;gap:12px}
     .sidebar{width:320px;background:#071029;padding:12px;overflow:auto;box-sizing:border-box}
     .main{flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#071124,#02101b)}
-    .chat-header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.02);color:#dbeafe}
     .chat-container{flex:1;overflow:auto;padding:16px}
     #chat{display:flex;flex-direction:column;gap:8px;max-width:800px;margin:0 auto}
     .composer{display:flex;align-items:center;padding:10px;border-top:1px solid rgba(255,255,255,0.02);gap:8px}
@@ -51,15 +50,7 @@
 
     <!-- Main chat -->
     <main class="main">
-      <header class="chat-header">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-size:1.05rem;font-weight:700">Abrox Trading Bots — Community</div>
-            <div style="font-size:12px;color:var(--muted)">Realistic simulation • Moderated Q&A • Live-like presence</div>
-          </div>
-          <div style="font-size:12px;color:var(--muted)">Members: <span id="memberCount">0</span></div>
-        </div>
-      </header>
+      <!-- Header removed to avoid blocking UI -->
 
       <section class="chat-container" aria-label="Chat messages">
         <div id="chat"></div>
@@ -83,7 +74,7 @@
   <!-- FingerprintDB logs (hidden by default) -->
   <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
 
-  <!-- Scripts in proper order -->
+  <!-- Scripts -->
   <script src="./fingerprint-db.js"></script>
   <script src="./icons.js"></script>
   <script src="./synthetic-people.js"></script>
@@ -102,7 +93,7 @@
       if(window.lucide) lucide.createIcons();
     });
 
-    // FingerprintDB log helper (hidden by default)
+    // FingerprintDB logging
     const logContainer = document.getElementById('fpLogs');
     function logToPage(msg){ logContainer.textContent += msg + '\n'; }
     const origLog = console.log, origErr = console.error;
@@ -118,7 +109,7 @@
       }catch(e){ console.error(e); }
     })();
 
-    // Boot simulation once scripts ready
+    // Boot simulation
     (async function boot(){
       window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
         if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
