@@ -87,7 +87,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-left: 52px;
+  margin-left: 52px; /* slight indent */
   font-size: 13px;
   color: var(--muted);
   margin-top: 4px;
@@ -255,29 +255,35 @@ button:hover {
 <div id="app" class="app-root">
   <!-- Sidebar -->
   <aside class="sidebar">
+    <!-- Top Row: Logo + Community + Members Icon -->
     <div class="logo-row">
       <img src="./assets/logo.png" alt="logo" class="logo">
       <div class="community-name">Abrox Bots Community</div>
       <button id="membersToggle" class="members-btn"><i data-lucide="users"></i></button>
     </div>
 
+    <!-- Second Row: Private Group -->
     <div class="private-row">
       <i data-lucide="lock"></i>
       <span>Private Group</span>
     </div>
 
+    <!-- Separator -->
     <hr class="header-separator">
 
+    <!-- Third Row: Live Info (dynamic) -->
     <div class="live-info" id="liveInfo" hidden>
       Online: <span id="onlineCount">0</span> |
       Typing: <span id="typingName">—</span> |
       Verified: <span id="verifiedCount">0</span>
     </div>
 
+    <!-- Fourth Row: System / Group Message -->
     <div class="system-info" id="systemInfo" hidden>
       Verification required to participate in this group.
     </div>
 
+    <!-- Members Panel -->
     <div id="membersPanel">
       <div class="close-btn">
         <button id="membersClose"><i data-lucide="x"></i></button>
@@ -287,6 +293,7 @@ button:hover {
     </div>
   </aside>
 
+  <!-- Main Chat -->
   <main class="main">
     <section class="chat-container">
       <div id="chat"></div>
@@ -319,6 +326,7 @@ button:hover {
 document.addEventListener("DOMContentLoaded", async () => {
   if(window.lucide) lucide.createIcons();
 
+  // Members Panel toggle
   const membersToggle = document.getElementById('membersToggle');
   const membersPanel = document.getElementById('membersPanel');
   const membersClose = document.getElementById('membersClose');
@@ -326,11 +334,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   membersToggle.addEventListener('click', ()=> { membersPanel.style.display = 'flex'; });
   membersClose.addEventListener('click', ()=> { membersPanel.style.display = 'none'; });
 
+  // Load scripts sequentially
   const scripts = [
+    './members-pool.js',
+    './synthetic-people.js',
     './fingerprint-db.js',
     './icons.js',
-    './synthetic-people.js',
-    './members-pool.js',   // ← added
     './message-pool.js',
     './message.js',
     './ui-adapter.js',
@@ -354,7 +363,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if(window.FingerprintDB) await FingerprintDB.init();
 
   if(window._abrox && window._abrox.onModulesReady){
-    window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
+    window._abrox.onModulesReady(['MembersPool','SyntheticPeople','MessagePool','Message'], function(){
       if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
         uiAdapter.prefill();
       }
@@ -365,11 +374,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     SimulationEngine.start();
   }
 
+  // Example: populate Live Info dynamically
   const liveInfo = document.getElementById('liveInfo');
   liveInfo.hidden = false;
-  document.getElementById('onlineCount').textContent = 12;
-  document.getElementById('typingName').textContent = 'Alex';
-  document.getElementById('verifiedCount').textContent = 5;
+  const counts = window.MembersAPI?.getCounts?.() || {online:0, verified:0, typing:[]};
+  document.getElementById('onlineCount').textContent = counts.online;
+  document.getElementById('typingName').textContent = counts.typing.join(", ") || '—';
+  document.getElementById('verifiedCount').textContent = counts.verified;
 
   const systemInfo = document.getElementById('systemInfo');
   systemInfo.hidden = false;
