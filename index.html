@@ -1,145 +1,244 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Abrox Chat — Testing-3</title>
-  <meta name="description" content="Testing-3 demo — Abrox chat with simulated members, moderated Q&A, live-like presence" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Abrox Chat — Testing-3</title>
+<meta name="description" content="Testing-3 demo — Abrox chat with simulated members, moderated Q&A, live-like presence" />
 
-  <!-- Inline CSS for layout & styling -->
-  <style>
-    :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa4b2;--accent:#3b82f6}
-    html,body {height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:var(--bg);}
-    .app-root {display:flex;height:100vh;width:100vw;gap:12px;overflow:hidden;}
-    .sidebar {width:320px;flex-shrink:0;background:#071029;padding:12px;box-sizing:border-box;overflow-y:auto;}
-    .main {flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#071124,#02101b);overflow:hidden;}
-    .chat-container {flex:1;overflow-y:auto;padding:16px;}
-    #chat {display:flex;flex-direction:column;gap:8px;max-width:800px;margin:0 auto;}
-    .composer {display:flex;align-items:center;padding:10px;border-top:1px solid rgba(255,255,255,0.02);gap:8px;}
-    .composer input#messageInput {flex:1;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#071833;color:#e6eef6;}
-    button {background:transparent;border:0;color:#cfe8ff;padding:8px;cursor:pointer;}
-    .typing-row {padding:8px 16px;color:var(--muted);font-size:0.9rem;}
-    .reply-preview {padding:8px 12px;background:#07192a;color:#d3e8ff;border-top:1px solid rgba(255,255,255,0.02);}
-    .members-list {margin-top:12px;}
-    .logo {width:36px;height:36px;}
-    #fpLogs {position:fixed;bottom:10px;right:10px;width:300px;height:150px;overflow:auto;background:#071124;color:#cfe8ff;padding:10px;font-size:12px;border:1px solid #0b1220;z-index:999;display:none;}
-  </style>
+<!-- Inline CSS for Telegram-style spacing -->
+<style>
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --muted:#9aa4b2;
+  --accent:#3b82f6;
+}
+html,body {
+  height:100%;
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  color:#e6eef6;
+  background:var(--bg);
+}
+.app-root {
+  display:flex;
+  height:100vh;
+  width:100vw;
+  gap:12px;
+  overflow:hidden;
+}
+.sidebar {
+  width:320px;
+  flex-shrink:0;
+  background:#071029;
+  padding:16px;
+  box-sizing:border-box;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.sidebar .logo-section {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.sidebar .logo-section img {
+  width:36px;
+  height:36px;
+}
+#membersList {
+  margin-top:12px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.main {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  background:linear-gradient(180deg,#071124,#02101b);
+  overflow:hidden;
+}
+.chat-container {
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+}
+#chat {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-width:800px;
+  margin:0 auto;
+}
+.composer {
+  display:flex;
+  align-items:center;
+  padding:12px;
+  border-top:1px solid rgba(255,255,255,0.02);
+  gap:8px;
+}
+.composer input#messageInput {
+  flex:1;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.04);
+  background:#071833;
+  color:#e6eef6;
+}
+button {
+  background:transparent;
+  border:0;
+  color:#cfe8ff;
+  padding:8px;
+  cursor:pointer;
+}
+#typingRow {
+  padding:8px 16px;
+  color:var(--muted);
+  font-size:0.9rem;
+}
+.reply-preview {
+  padding:8px 12px;
+  background:#07192a;
+  color:#d3e8ff;
+  border-top:1px solid rgba(255,255,255,0.02);
+}
+#fpLogs {
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  width:300px;
+  height:150px;
+  overflow:auto;
+  background:#071124;
+  color:#cfe8ff;
+  padding:10px;
+  font-size:12px;
+  border:1px solid #0b1220;
+  z-index:999;
+  display:none; /* hide logs by default */
+}
+</style>
 
-  <!-- Lucide icons -->
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
+<!-- Lucide icons -->
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/lucide.min.js"></script>
 </head>
 <body>
-  <div id="app" class="app-root">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <img src="./assets/logo.png" alt="logo" class="logo">
-        <div style="flex:1">
-          <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
-          <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
-        </div>
+<div id="app" class="app-root">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo-section">
+      <img src="./assets/logo.png" alt="logo">
+      <div>
+        <div style="font-weight:700;color:#cfe8ff">Abrox Bots • Demo</div>
+        <div style="font-size:12px;color:var(--muted)">Simulated trading community</div>
       </div>
+    </div>
 
-      <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-        <input id="memberSearch" placeholder="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
-        <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="memberSearch" placeholder="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
+      <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
+    </div>
+
+    <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
+  </aside>
+
+  <!-- Main chat -->
+  <main class="main">
+    <!-- Chat messages -->
+    <section class="chat-container" aria-label="Chat messages">
+      <div id="chat"></div>
+    </section>
+
+    <!-- Reply preview -->
+    <div id="replyPreviewContainer" class="reply-preview" hidden></div>
+
+    <!-- Composer -->
+    <footer class="composer">
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="emojiBtn"><i data-lucide="smile"></i></button>
+        <button id="mediaBtn"><i data-lucide="paperclip"></i></button>
+        <input id="fileInput" type="file" style="display:none">
+        <button id="micBtn"><i data-lucide="mic"></i></button>
       </div>
+      <div style="flex:1;margin:0 8px;">
+        <input id="messageInput" placeholder="Message @community">
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button id="sendBtn">Send</button>
+      </div>
+    </footer>
 
-      <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
-    </aside>
+    <!-- Typing row -->
+    <div id="typingRow" class="typing-row" hidden></div>
+  </main>
+</div>
 
-    <!-- Main chat -->
-    <main class="main">
-      <!-- Chat container -->
-      <section class="chat-container" aria-label="Chat messages">
-        <div id="chat"></div>
-      </section>
+<!-- FingerprintDB logs -->
+<pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
 
-      <!-- Reply preview -->
-      <div id="replyPreviewContainer" class="reply-preview" hidden></div>
+<!-- Scripts -->
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  // Initialize Lucide icons
+  if(window.lucide) lucide.createIcons();
 
-      <!-- Composer -->
-      <footer class="composer">
-        <div style="display:flex;gap:6px;align-items:center;">
-          <button id="emojiBtn"><i data-lucide="smile"></i></button>
-          <button id="mediaBtn"><i data-lucide="paperclip"></i></button>
-          <input id="fileInput" type="file" style="display:none">
-          <button id="micBtn"><i data-lucide="mic"></i></button>
-        </div>
-        <div style="flex:1;margin:0 8px;">
-          <input id="messageInput" placeholder="Message @community">
-        </div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button id="sendBtn">Send</button>
-        </div>
-      </footer>
+  // Load scripts sequentially
+  const scripts = [
+    './fingerprint-db.js',
+    './icons.js',
+    './synthetic-people.js',
+    './message-pool.js',
+    './message.js',
+    './ui-adapter.js',
+    './presence-manager.js',
+    './typing-engine.js',
+    './simulation-engine.js',
+    './moderated-qa.js',
+    './precache.js'
+  ];
 
-      <!-- Typing row -->
-      <div id="typingRow" class="typing-row" hidden></div>
-    </main>
-  </div>
+  for (const src of scripts){
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = res;
+      s.onerror = () => rej(new Error('Failed to load ' + src));
+      document.body.appendChild(s);
+    });
+  }
 
-  <!-- FingerprintDB logs -->
-  <pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
+  // Initialize FingerprintDB
+  if(window.FingerprintDB){
+    await FingerprintDB.init();
+    console.log('✅ FingerprintDB ready');
+  }
 
-  <!-- Scripts -->
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      // Initialize Lucide icons
-      if(window.lucide) lucide.createIcons();
-
-      // Load scripts in proper order
-      const scripts = [
-        './fingerprint-db.js',
-        './icons.js',
-        './synthetic-people.js',
-        './message-pool.js',
-        './message.js',
-        './ui-adapter.js',
-        './presence-manager.js',
-        './typing-engine.js',
-        './simulation-engine.js',
-        './moderated-qa.js',
-        './precache.js'
-      ];
-
-      for (const src of scripts){
-        await new Promise((res, rej) => {
-          const s = document.createElement('script');
-          s.src = src;
-          s.onload = res;
-          s.onerror = () => rej(new Error('Failed to load ' + src));
-          document.body.appendChild(s);
-        });
-      }
-
-      // Initialize FingerprintDB
-      if(window.FingerprintDB){
-        await FingerprintDB.init();
-        console.log('✅ FingerprintDB ready');
-      }
-
-      // Prefill UI
-      if(window._abrox && window._abrox.onModulesReady){
-        window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
-          if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
-            uiAdapter.prefill();
-          }
-        });
-      }
-
-      // Start simulation
-      if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
-        SimulationEngine.start();
+  // Prefill UI
+  if(window._abrox && window._abrox.onModulesReady){
+    window._abrox.onModulesReady(['MessagePool','SyntheticPeople','Message'], function(){
+      if(window.uiAdapter && typeof window.uiAdapter.prefill === 'function'){
+        uiAdapter.prefill();
       }
     });
+  }
 
-    // Log to page helper
-    const logContainer = document.getElementById('fpLogs');
-    function logToPage(msg){ logContainer.textContent += msg + '\n'; }
-    const origLog = console.log, origErr = console.error;
-    console.log = (...args)=>{ logToPage(args.join(' ')); origLog.apply(console,args); };
-    console.error = (...args)=>{ logToPage('❌ '+args.join(' ')); origErr.apply(console,args); };
-  </script>
+  // Start simulation
+  if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
+    SimulationEngine.start();
+  }
+});
+
+// Log to page helper
+const logContainer = document.getElementById('fpLogs');
+function logToPage(msg){ logContainer.textContent += msg + '\n'; }
+const origLog = console.log, origErr = console.error;
+console.log = (...args)=>{ logToPage(args.join(' ')); origLog.apply(console,args); };
+console.error = (...args)=>{ logToPage('❌ '+args.join(' ')); origErr.apply(console,args); };
+</script>
 </body>
 </html>
