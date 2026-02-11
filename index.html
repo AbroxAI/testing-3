@@ -1,125 +1,124 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Abrox Chat — Testing-3</title>
-<meta name="description" content="Testing-3 demo — Abrox chat with simulated members, moderated Q&A, live-like presence" />
+<meta name="description" content="Abrox chat testing-3 — fully dynamic simulated community" />
 
-<!-- Inline CSS for Telegram-style spacing -->
+<!-- Minimal Telegram-style CSS -->
 <style>
-:root{
-  --bg:#0f1724;
-  --card:#0b1220;
-  --muted:#9aa4b2;
-  --accent:#3b82f6;
+:root {
+  --bg: #0f1724;
+  --card: #0b1220;
+  --muted: #9aa4b2;
+  --accent: #3b82f6;
 }
-html,body {
-  height:100%;
-  margin:0;
-  font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
-  color:#e6eef6;
-  background:var(--bg);
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--bg);
+  color: #e6eef6;
 }
 .app-root {
-  display:flex;
-  height:100vh;
-  width:100vw;
-  gap:12px;
-  overflow:hidden;
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  gap: 12px;
+  overflow: hidden;
 }
 .sidebar {
-  width:320px;
-  flex-shrink:0;
-  background:#071029;
-  padding:16px;
-  box-sizing:border-box;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+  width: 320px;
+  flex-shrink: 0;
+  background: #071029;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+  overflow-y: auto;
 }
 .sidebar .logo-section {
-  display:flex;
-  align-items:center;
-  gap:8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .sidebar .logo-section img {
-  width:36px;
-  height:36px;
+  width: 36px;
+  height: 36px;
 }
 #membersList {
-  margin-top:12px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
 }
 .main {
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  background:linear-gradient(180deg,#071124,#02101b);
-  overflow:hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg,#071124,#02101b);
+  overflow: hidden;
 }
 .chat-container {
-  flex:1;
-  overflow-y:auto;
-  padding:16px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
 }
 #chat {
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  max-width:800px;
-  margin:0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 .composer {
-  display:flex;
-  align-items:center;
-  padding:12px;
-  border-top:1px solid rgba(255,255,255,0.02);
-  gap:8px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,0.02);
+  gap: 8px;
 }
 .composer input#messageInput {
-  flex:1;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.04);
-  background:#071833;
-  color:#e6eef6;
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.04);
+  background: #071833;
+  color: #e6eef6;
 }
 button {
-  background:transparent;
-  border:0;
-  color:#cfe8ff;
-  padding:8px;
-  cursor:pointer;
+  background: transparent;
+  border: none;
+  color: #cfe8ff;
+  padding: 8px;
+  cursor: pointer;
 }
 #typingRow {
-  padding:8px 16px;
-  color:var(--muted);
-  font-size:0.9rem;
+  padding: 8px 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 .reply-preview {
-  padding:8px 12px;
-  background:#07192a;
-  color:#d3e8ff;
-  border-top:1px solid rgba(255,255,255,0.02);
+  padding: 8px 12px;
+  background: #07192a;
+  color: #d3e8ff;
+  border-top: 1px solid rgba(255,255,255,0.02);
 }
 #fpLogs {
-  position:fixed;
-  bottom:10px;
-  right:10px;
-  width:300px;
-  height:150px;
-  overflow:auto;
-  background:#071124;
-  color:#cfe8ff;
-  padding:10px;
-  font-size:12px;
-  border:1px solid #0b1220;
-  z-index:999;
-  display:none; /* hide logs by default */
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 300px;
+  height: 150px;
+  overflow: auto;
+  background: #071124;
+  color: #cfe8ff;
+  padding: 10px;
+  font-size: 12px;
+  border: 1px solid #0b1220;
+  z-index: 999;
+  display: none;
 }
 </style>
 
@@ -129,7 +128,6 @@ button {
 <body>
 
 <div id="app" class="app-root">
-
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo-section">
@@ -140,23 +138,19 @@ button {
       </div>
     </div>
 
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input id="memberSearch" placeholder="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
-      <div style="font-size:12px;color:var(--muted)">Online <span id="onlineCount">0</span></div>
-    </div>
+    <input id="memberSearch" placeholder="Search members" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.02);background:#051226;color:#e6eef6">
 
-    <div id="membersList" class="members-list" aria-live="polite" role="list"></div>
+    <div id="membersList" aria-live="polite" role="list"></div>
   </aside>
 
-  <!-- Main chat -->
+  <!-- Main Chat -->
   <main class="main">
-    <!-- Chat messages -->
-    <section class="chat-container" aria-label="Chat messages">
+    <section class="chat-container">
       <div id="chat"></div>
     </section>
-    <!-- Reply preview -->
+
     <div id="replyPreviewContainer" class="reply-preview" hidden></div>
-    <!-- Composer -->
+
     <footer class="composer">
       <div style="display:flex;gap:6px;align-items:center;">
         <button id="emojiBtn"><i data-lucide="smile"></i></button>
@@ -172,15 +166,14 @@ button {
       </div>
     </footer>
 
-    <!-- Typing row -->
-    <div id="typingRow" class="typing-row" hidden></div>
+    <div id="typingRow" hidden></div>
   </main>
 </div>
 
 <!-- FingerprintDB logs -->
-<pre id="fpLogs">FingerprintDB Test\nInitializing...\n</pre>
+<pre id="fpLogs"></pre>
 
-<!-- Load all scripts sequentially -->
+<!-- Load scripts sequentially after DOM is ready -->
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
   if(window.lucide) lucide.createIcons();
@@ -199,21 +192,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     './precache.js'
   ];
 
-  for (const src of scripts){
-    await new Promise((res, rej) => {
+  for(const src of scripts){
+    await new Promise((res, rej)=>{
       const s = document.createElement('script');
       s.src = src;
       s.onload = res;
-      s.onerror = () => rej(new Error('Failed to load ' + src));
+      s.onerror = ()=>rej(new Error('Failed to load ' + src));
       document.body.appendChild(s);
     });
   }
 
   // Initialize FingerprintDB
-  if(window.FingerprintDB){
-    await FingerprintDB.init();
-    console.log('✅ FingerprintDB ready');
-  }
+  if(window.FingerprintDB) await FingerprintDB.init();
 
   // Prefill UI
   if(window._abrox && window._abrox.onModulesReady){
@@ -229,14 +219,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     SimulationEngine.start();
   }
 });
-
-// Log helper
-const logContainer = document.getElementById('fpLogs');
-function logToPage(msg){ logContainer.textContent += msg + '\n'; }
-const origLog = console.log, origErr = console.error;
-console.log = (...args)=>{ logToPage(args.join(' ')); origLog.apply(console,args); };
-console.error = (...args)=>{ logToPage('❌ '+args.join(' ')); origErr.apply(console,args); };
 </script>
-
 </body>
 </html>
