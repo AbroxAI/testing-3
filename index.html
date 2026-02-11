@@ -105,7 +105,16 @@ html, body {
   font-size: 12px;
   color: #cfe8ff;
   margin-left: 52px;
+  margin-bottom: 4px;
+}
+
+/* System / Group Message row */
+.system-info {
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 52px;
   margin-bottom: 6px;
+  font-style: italic;
 }
 
 /* Members Panel */
@@ -269,6 +278,11 @@ button:hover {
       Verified: <span id="verifiedCount">0</span>
     </div>
 
+    <!-- Fourth Row: System / Group Message -->
+    <div class="system-info" id="systemInfo" hidden>
+      Verification required to participate in this group.
+    </div>
+
     <!-- Members Panel -->
     <div id="membersPanel">
       <div class="close-btn">
@@ -358,6 +372,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   if(window.SimulationEngine && typeof window.SimulationEngine.start === 'function'){
     SimulationEngine.start();
   }
+
+  // Example: populate Live Info dynamically
+  const liveInfo = document.getElementById('liveInfo');
+  liveInfo.hidden = false;
+  document.getElementById('onlineCount').textContent = 12;
+  document.getElementById('typingName').textContent = 'Alex';
+  document.getElementById('verifiedCount').textContent = 5;
+
+  const systemInfo = document.getElementById('systemInfo');
+  systemInfo.hidden = false;
 });
 </script>
 
