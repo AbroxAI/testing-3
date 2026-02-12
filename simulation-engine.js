@@ -1,63 +1,52 @@
 // js/simulation-engine.js
+// Simulates online/offline and typing behavior for your synthetic members
 
-window.SimulationEngine = (function(){
-  let config = {
-    minDelay: 1000,
-    maxDelay: 5000,
-    multiMessageChance: 0.3,
-    maxMulti: 3
-  };
-  let running = false;
+(function () {
+  if (!window.SyntheticPeople) {
+    console.warn("SyntheticPeople not loaded yet. Simulation engine will not run.");
+    return;
+  }
 
-  async function sendRandomMessage(){
-    const online = window.SyntheticPeople.getOnlineMembers();
-    if(online.length === 0) return;
+  const SimulationEngine = {
+    intervalIds: [],
 
-    const member = online[Math.floor(Math.random() * online.length)];
-    const text = window.SyntheticPeople.randomMessage();
+    start() {
+      const members = SyntheticPeople.getAll();
 
-    const msg = {
-      text,
-      authorId: member.name,
-      timestamp: Date.now()
-    };
+      members.forEach(member => {
+        // Random presence toggling
+        const presenceInterval = setInterval(() => {
+          const isOnline = Math.random() < 0.65; // 65% chance online
+          SyntheticPeople.setOnline(member.id, isOnline);
+        }, 5000 + Math.random() * 5000); // 5–10s interval
 
-    const added = window.MessagePool.addMessage(msg);
-    window.Message.renderMessage(added);
+        this.intervalIds.push(presenceInterval);
 
-    // Handle multi-message bursts
-    if(Math.random() < config.multiMessageChance){
-      const count = 1 + Math.floor(Math.random() * config.maxMulti);
-      for(let i=1;i<count;i++){
-        setTimeout(()=>{
-          const burstText = window.SyntheticPeople.randomMessage();
-          const burstMsg = { text: burstText, authorId: member.name, timestamp: Date.now() };
-          const addedBurst = window.MessagePool.addMessage(burstMsg);
-          window.Message.renderMessage(addedBurst);
-        }, 500 + Math.random()*1000);
-      }
+        // Random typing simulation
+        const typingInterval = setInterval(() => {
+          if (!member.online) return; // Only online members type
+          const isTyping = Math.random() < 0.2; // 20% chance to type
+          SyntheticPeople.setTyping(member.id, isTyping);
+
+          if (isTyping) {
+            // Stop typing after short duration
+            setTimeout(() => SyntheticPeople.setTyping(member.id, false), 2000 + Math.random() * 3000);
+          }
+        }, 3000 + Math.random() * 4000); // 3–7s interval
+
+        this.intervalIds.push(typingInterval);
+      });
+
+      console.log(`SimulationEngine started for ${members.length} members.`);
+    },
+
+    stop() {
+      this.intervalIds.forEach(id => clearInterval(id));
+      this.intervalIds = [];
+      console.log("SimulationEngine stopped.");
     }
-  }
+  };
 
-  async function run(){
-    if(!running) return;
-    await sendRandomMessage();
-    const delay = config.minDelay + Math.random()*(config.maxDelay-config.minDelay);
-    setTimeout(run, delay);
-  }
+  window.SimulationEngine = SimulationEngine;
 
-  function start(){
-    running = true;
-    run();
-  }
-
-  function stop(){
-    running = false;
-  }
-
-  function configure(opts){
-    config = {...config, ...opts};
-  }
-
-  return { start, stop, configure };
 })();
