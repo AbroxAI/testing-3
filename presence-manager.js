@@ -1,47 +1,56 @@
 // js/presence-manager.js
+// Tracks live presence stats and notifies UI
 
-window.PresenceManager = (function(){
-  const membersListEl = document.getElementById('membersList');
-  const onlineCountEl = document.getElementById('onlineCount');
-  const memberCountEl = document.getElementById('memberCount');
+(function () {
 
-  function renderMember(member){
-    let el = document.getElementById('member-'+member.id);
-    if(!el){
-      el = document.createElement('div');
-      el.id = 'member-'+member.id;
-      el.className = 'member';
-      membersListEl.appendChild(el);
+  if (!window.SyntheticPeople) {
+    console.warn("SyntheticPeople not loaded yet. PresenceManager waiting.");
+    return;
+  }
+
+  const PresenceManager = {
+
+    stats: {
+      online: 0,
+      typing: 0,
+      verified: 0
+    },
+
+    calculate() {
+      const members = SyntheticPeople.getAll();
+
+      this.stats.online = members.filter(m => m.online).length;
+      this.stats.typing = members.filter(m => m.typing).length;
+      this.stats.verified = members.filter(m => m.verified).length;
+
+      // broadcast update event
+      window.dispatchEvent(new CustomEvent("presence:stats", {
+        detail: { ...this.stats }
+      }));
+    },
+
+    start() {
+      // initial calc
+      this.calculate();
+
+      // recalc whenever simulation updates
+      window.addEventListener("presence:update", () => this.calculate());
+      window.addEventListener("typing:update", () => this.calculate());
+
+      console.log("PresenceManager started.");
+    },
+
+    getStats() {
+      return { ...this.stats };
     }
-    el.innerHTML = `<img src="${member.avatar}" width="24" height="24" style="border-radius:50%;margin-right:6px;"> 
-                    <span>${member.name}</span> ${member.online ? '🟢' : '⚪'}`;
-  }
 
-  function updateAll(){
-    const members = window.SyntheticPeople.getAllMembers();
-    members.forEach(renderMember);
-    const onlineCount = window.SyntheticPeople.getOnlineMembers().length;
-    onlineCountEl.textContent = onlineCount;
-    memberCountEl.textContent = members.length;
-  }
-
-  function setOnline(memberId, state){
-    const member = window.SyntheticPeople.getAllMembers().find(m => m.id === memberId);
-    if(member){
-      member.online = state;
-      renderMember(member);
-      updateAll();
-    }
-  }
-
-  function init(){
-    updateAll();
-  }
-
-  return {
-    renderMember,
-    updateAll,
-    setOnline,
-    init
   };
+
+  window.PresenceManager = PresenceManager;
+
+  // auto start
+  document.addEventListener("DOMContentLoaded", () => {
+    PresenceManager.start();
+  });
+
 })();
