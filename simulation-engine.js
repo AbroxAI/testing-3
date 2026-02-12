@@ -1,69 +1,65 @@
 // js/simulation-engine.js
-// Controls global community simulation (presence + typing + message trigger)
-// Requires: synthetic-people.js
+// Simulates online/offline and typing behavior for synthetic members
+// Dispatches update events so PresenceManager and UI stay synced
 
 (function () {
 
   if (!window.SyntheticPeople) {
-    console.warn("SyntheticPeople not loaded yet. SimulationEngine waiting.");
+    console.warn("SyntheticPeople not loaded yet. Simulation engine will not run.");
     return;
   }
 
   const SimulationEngine = {
-
-    interval: null,
+    intervalIds: [],
 
     start() {
-      if (this.interval) return;
+      const members = SyntheticPeople.getAll();
 
-      this.interval = setInterval(() => {
+      members.forEach(member => {
 
-        const members = SyntheticPeople.getAll();
-        if (!members.length) return;
+        // --- PRESENCE SIMULATION ---
+        const presenceInterval = setInterval(() => {
+          const isOnline = Math.random() < 0.65; // 65% chance online
+          SyntheticPeople.setOnline(member.id, isOnline);
 
-        // pick random active members
-        const activeCount = Math.floor(Math.random() * 6) + 1;
+          // notify system
+          window.dispatchEvent(new Event("presence:update"));
 
-        for (let i = 0; i < activeCount; i++) {
+        }, 5000 + Math.random() * 5000);
 
-          const member = members[Math.floor(Math.random() * members.length)];
+        this.intervalIds.push(presenceInterval);
 
-          // presence change
-          if (Math.random() < 0.4) {
-            SyntheticPeople.setOnline(member.id, Math.random() < 0.7);
-          }
 
-          // typing simulation
-          if (member.online && Math.random() < 0.35) {
-            SyntheticPeople.setTyping(member.id, true);
+        // --- TYPING SIMULATION ---
+        const typingInterval = setInterval(() => {
 
+          const current = SyntheticPeople.getById(member.id);
+          if (!current || !current.online) return;
+
+          const isTyping = Math.random() < 0.2;
+          SyntheticPeople.setTyping(member.id, isTyping);
+
+          window.dispatchEvent(new Event("typing:update"));
+
+          if (isTyping) {
             setTimeout(() => {
               SyntheticPeople.setTyping(member.id, false);
-              window.dispatchEvent(new CustomEvent("typing:update"));
-            }, 1500 + Math.random() * 2500);
+              window.dispatchEvent(new Event("typing:update"));
+            }, 2000 + Math.random() * 3000);
           }
 
-          // trigger message event (handled by message engine)
-          if (member.online && Math.random() < 0.25) {
-            window.dispatchEvent(new CustomEvent("member:message", {
-              detail: { memberId: member.id }
-            }));
-          }
-        }
+        }, 3000 + Math.random() * 4000);
 
-        // notify presence change
-        window.dispatchEvent(new CustomEvent("presence:update"));
+        this.intervalIds.push(typingInterval);
+      });
 
-      }, 4000);
-
-      console.log("SimulationEngine started.");
+      console.log(`SimulationEngine started for ${members.length} members.`);
     },
 
     stop() {
-      if (this.interval) {
-        clearInterval(this.interval);
-        this.interval = null;
-      }
+      this.intervalIds.forEach(id => clearInterval(id));
+      this.intervalIds = [];
+      console.log("SimulationEngine stopped.");
     }
   };
 
