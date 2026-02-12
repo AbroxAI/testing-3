@@ -1,49 +1,69 @@
 // js/simulation-engine.js
-// Simulates online/offline and typing behavior for your synthetic members
+// Controls global community simulation (presence + typing + message trigger)
+// Requires: synthetic-people.js
 
 (function () {
+
   if (!window.SyntheticPeople) {
-    console.warn("SyntheticPeople not loaded yet. Simulation engine will not run.");
+    console.warn("SyntheticPeople not loaded yet. SimulationEngine waiting.");
     return;
   }
 
   const SimulationEngine = {
-    intervalIds: [],
+
+    interval: null,
 
     start() {
-      const members = SyntheticPeople.getAll();
+      if (this.interval) return;
 
-      members.forEach(member => {
-        // Random presence toggling
-        const presenceInterval = setInterval(() => {
-          const isOnline = Math.random() < 0.65; // 65% chance online
-          SyntheticPeople.setOnline(member.id, isOnline);
-        }, 5000 + Math.random() * 5000); // 5–10s interval
+      this.interval = setInterval(() => {
 
-        this.intervalIds.push(presenceInterval);
+        const members = SyntheticPeople.getAll();
+        if (!members.length) return;
 
-        // Random typing simulation
-        const typingInterval = setInterval(() => {
-          if (!member.online) return; // Only online members type
-          const isTyping = Math.random() < 0.2; // 20% chance to type
-          SyntheticPeople.setTyping(member.id, isTyping);
+        // pick random active members
+        const activeCount = Math.floor(Math.random() * 6) + 1;
 
-          if (isTyping) {
-            // Stop typing after short duration
-            setTimeout(() => SyntheticPeople.setTyping(member.id, false), 2000 + Math.random() * 3000);
+        for (let i = 0; i < activeCount; i++) {
+
+          const member = members[Math.floor(Math.random() * members.length)];
+
+          // presence change
+          if (Math.random() < 0.4) {
+            SyntheticPeople.setOnline(member.id, Math.random() < 0.7);
           }
-        }, 3000 + Math.random() * 4000); // 3–7s interval
 
-        this.intervalIds.push(typingInterval);
-      });
+          // typing simulation
+          if (member.online && Math.random() < 0.35) {
+            SyntheticPeople.setTyping(member.id, true);
 
-      console.log(`SimulationEngine started for ${members.length} members.`);
+            setTimeout(() => {
+              SyntheticPeople.setTyping(member.id, false);
+              window.dispatchEvent(new CustomEvent("typing:update"));
+            }, 1500 + Math.random() * 2500);
+          }
+
+          // trigger message event (handled by message engine)
+          if (member.online && Math.random() < 0.25) {
+            window.dispatchEvent(new CustomEvent("member:message", {
+              detail: { memberId: member.id }
+            }));
+          }
+        }
+
+        // notify presence change
+        window.dispatchEvent(new CustomEvent("presence:update"));
+
+      }, 4000);
+
+      console.log("SimulationEngine started.");
     },
 
     stop() {
-      this.intervalIds.forEach(id => clearInterval(id));
-      this.intervalIds = [];
-      console.log("SimulationEngine stopped.");
+      if (this.interval) {
+        clearInterval(this.interval);
+        this.interval = null;
+      }
     }
   };
 
