@@ -1,35 +1,50 @@
 // js/typing-engine.js
+// Simulates realistic typing activity among online members
+// Requires: members-pool.js + synthetic-people.js
 
-window.TypingEngine = (function(){
-  const typingRow = document.getElementById('typingRow');
+(function () {
 
-  function memberTyping(memberId, duration = 2000){
-    const member = window.SyntheticPeople.getAllMembers().find(m => m.id === memberId);
-    if(!member) return;
+  const TypingEngine = {
 
-    member.typing = true;
-    window.Message.showTyping(member.name);
+    interval: null,
 
-    setTimeout(()=>{
-      member.typing = false;
-      window.Message.hideTyping();
-    }, duration);
-  }
+    start() {
+      if (this.interval) return;
 
-  function randomTyping(){
-    const online = window.SyntheticPeople.getOnlineMembers();
-    if(online.length === 0) return;
-    const member = online[Math.floor(Math.random()*online.length)];
-    memberTyping(member.id, 1000 + Math.random()*2000);
-  }
+      this.interval = setInterval(() => {
+        const onlineMembers = window.SyntheticPeople.getOnlineMembers();
+        if (!onlineMembers.length) return;
 
-  function startAutoTyping(interval = 5000){
-    setInterval(randomTyping, interval);
-  }
+        // pick 1–3 random online members to type
+        const typingCount = Math.max(1, Math.floor(Math.random() * 3));
+        const selected = window.SyntheticPeople.getRandom(typingCount);
 
-  return {
-    memberTyping,
-    randomTyping,
-    startAutoTyping
+        selected.forEach(member => {
+          window.SyntheticPeople.setTyping(member.id, true);
+
+          // stop typing after random delay
+          setTimeout(() => {
+            window.SyntheticPeople.setTyping(member.id, false);
+
+            // notify UI
+            window.dispatchEvent(new CustomEvent("typing:update"));
+          }, 2000 + Math.random() * 4000);
+        });
+
+        // notify UI
+        window.dispatchEvent(new CustomEvent("typing:update"));
+
+      }, 5000); // every 5 seconds
+    },
+
+    stop() {
+      if (this.interval) {
+        clearInterval(this.interval);
+        this.interval = null;
+      }
+    }
   };
+
+  window.TypingEngine = TypingEngine;
+
 })();
